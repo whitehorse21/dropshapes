@@ -1,0 +1,48 @@
+# FastAPI and dependencies
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+python-multipart
+python-jose
+passlib==1.7.4
+bcrypt==3.2.2
+email-validator
+jinja2
+
+# Database
+sqlalchemy
+psycopg2-binary
+alembic
+
+# AWS Services
+boto3
+botocore
+
+# AWS AI Services
+boto3[bedrock]
+boto3[comprehend]
+boto3[transcribe]
+boto3[polly]
+
+# Payment Processing
+stripe
+
+# Utils
+python-dotenv
+requests
+pillow
+aiofiles
+python-dateutil
+
+# Caching
+redis
+
+# Testing
+httpx
+
+# PDF Analysis
+PyPDF2
+
+# PDF Generation
+reportlab
