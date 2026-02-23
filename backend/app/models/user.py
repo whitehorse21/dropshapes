@@ -34,3 +34,4 @@ class User(Base):
     interview_sessions = relationship("InterviewSession", back_populates="user")
     performance_records = relationship("UserPerformance", back_populates="user")
     invoices = relationship("Invoice", back_populates="user")
+    drive_items = relationship("DriveItem", back_populates="user")

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
@@ -201,7 +201,7 @@ def get_user_credits(current_user: User = Depends(get_current_active_user)):
 
 @router.post("/credits/add")
 def add_credits(
-    credits: int,
+    credits: int = Query(..., description="Number of credits to add"),
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -220,7 +220,7 @@ def add_credits(
 
 @router.post("/credits/give-trial")
 def give_trial_credits_to_user(
-    user_email: str,
+    user_email: str = Query(..., description="Email of the user to give trial credits to"),
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):

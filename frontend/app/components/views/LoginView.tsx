@@ -5,30 +5,44 @@ import { useAuth } from "../../context/AuthContext";
 import { signIn } from "next-auth/react";
 
 export default function LoginView() {
-  const { login } = useAuth();
+  const { login, register, isLoading, error, clearError } = useAuth();
   const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    clearError();
 
-    // Mock auth for "Sign Up" or "Sign In" with email/password
-    // In a real app with NextAuth, "Sign In" with credentials would also use signIn('credentials', ...)
-    // For now, we simulate the "Credentials" flow to keep the existing simple logic working alongside OAuth.
-    setTimeout(() => {
-      login(name || email.split("@")[0] || "User");
-      setLoading(false);
-    }, 1000);
+    if (activeTab === "signin") {
+      const result = await login({ email, password });
+      if (!result.success) {
+        return;
+      }
+    } else {
+      if (!agreeToTerms) {
+        return;
+      }
+      const result = await register({
+        email,
+        password,
+        name: name || email.split("@")[0],
+        username: email.split("@")[0],
+        agree_to_terms: agreeToTerms,
+      });
+      if (!result.success) {
+        return;
+      }
+    }
   };
 
   const handleSocialLogin = (provider: string) => {
-    // This will redirect to the provider's login page
     signIn(provider, { callbackUrl: "/" });
   };
+
+  const loading = isLoading;
 
   return (
     <div id="view-login">
@@ -42,14 +56,14 @@ export default function LoginView() {
           <button
             type="button"
             className={`auth-tab ${activeTab === "signin" ? "active" : ""}`}
-            onClick={() => setActiveTab("signin")}
+            onClick={() => { setActiveTab("signin"); clearError(); }}
           >
             Sign In
           </button>
           <button
             type="button"
             className={`auth-tab ${activeTab === "signup" ? "active" : ""}`}
-            onClick={() => setActiveTab("signup")}
+            onClick={() => { setActiveTab("signup"); clearError(); }}
           >
             Sign Up
           </button>
@@ -105,6 +119,26 @@ export default function LoginView() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
+
+          {activeTab === "signup" && (
+            <div className="form-group">
+              <label className="form-label checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={agreeToTerms}
+                  onChange={(e) => setAgreeToTerms(e.target.checked)}
+                  required
+                />
+                I agree to the terms of service
+              </label>
+            </div>
+          )}
+
+          {error && (
+            <div className="auth-error" role="alert">
+              {error}
+            </div>
+          )}
 
           <button type="submit" className="btn-submit-auth" disabled={loading}>
             {loading

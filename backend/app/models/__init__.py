@@ -12,6 +12,7 @@ from app.models.comment import Comment
 from app.models.assignment import Assignment, AssignmentStatus
 from app.models.task import Task
 from app.models.billing import Invoice, InvoiceLineItem
+from app.models.drive import DriveItem
 from app.models.interview import (
     InterviewSession, 
     InterviewQuestion, 

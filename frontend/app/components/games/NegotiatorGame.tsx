@@ -124,14 +124,14 @@ export default function NegotiatorGame() {
             <GameCard title="The Negotiator" icon={<MessageCircle className="w-6 h-6" />}>
 
                 {/* Situation Text */}
-                <p className="text-slate-300 text-lg leading-relaxed mb-8">
+                <p className="text-slate-300 text-base sm:text-lg leading-relaxed mb-6 sm:mb-8">
                     {scene.situation}
                 </p>
 
                 {/* Dialogue Options or Ending */}
                 {scene.isEnding ? (
                     <div className="space-y-4">
-                        <div className={`p-6 rounded-xl border-2 ${trustScore >= 70 ? 'bg-green-900/20 border-green-500/50' :
+                        <div className={`p-4 sm:p-6 rounded-xl border-2 ${trustScore >= 70 ? 'bg-green-900/20 border-green-500/50' :
                                 trustScore >= 40 ? 'bg-yellow-900/20 border-yellow-500/50' :
                                     'bg-red-900/20 border-red-500/50'
                             }`}>
@@ -150,19 +150,19 @@ export default function NegotiatorGame() {
                             <button
                                 key={index}
                                 onClick={() => handleChoice(option)}
-                                className={`w-full text-left p-5 rounded-xl border-2 transition-all duration-200 group hover:scale-[1.02] ${option.type === 'aggressive' ? 'bg-red-900/10 border-red-800/50 hover:bg-red-900/20 hover:border-red-600' :
+                                className={`w-full text-left p-4 sm:p-5 rounded-xl border-2 transition-all duration-200 group hover:scale-[1.02] min-h-[52px] ${option.type === 'aggressive' ? 'bg-red-900/10 border-red-800/50 hover:bg-red-900/20 hover:border-red-600' :
                                         option.type === 'empathetic' ? 'bg-green-900/10 border-green-800/50 hover:bg-green-900/20 hover:border-green-600' :
                                             'bg-slate-800/30 border-slate-700 hover:bg-slate-800/50 hover:border-slate-600'
                                     }`}
                             >
-                                <div className="flex items-start gap-4">
-                                    <span className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg font-bold text-sm ${option.type === 'aggressive' ? 'bg-red-800 text-red-100' :
+                                <div className="flex items-start gap-3 sm:gap-4">
+                                    <span className={`flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg font-bold text-xs sm:text-sm ${option.type === 'aggressive' ? 'bg-red-800 text-red-100' :
                                             option.type === 'empathetic' ? 'bg-green-800 text-green-100' :
                                                 'bg-slate-700 text-slate-200'
                                         }`}>
                                         {String.fromCharCode(65 + index)}
                                     </span>
-                                    <span className="text-lg text-slate-200 group-hover:text-slate-50">{option.text}</span>
+                                    <span className="text-base sm:text-lg text-slate-200 group-hover:text-slate-50 break-words">{option.text}</span>
                                 </div>
                             </button>
                         ))}

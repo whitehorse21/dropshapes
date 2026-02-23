@@ -1,59 +1,98 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import React, { createContext, useContext, useEffect } from 'react';
+import useAuthStore from '../store/authStore';
+
+export interface AuthUser {
+  id?: number;
+  email?: string;
+  username?: string;
+  name?: string;
+  is_admin?: boolean;
+  [key: string]: unknown;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterData {
+  email?: string;
+  username?: string;
+  password?: string;
+  name?: string;
+  agree_to_terms?: boolean;
+  [key: string]: unknown;
+}
 
 interface AuthContextType {
-    user: string | null;
-    isLoading: boolean;
-    login: (username: string) => void;
-    logout: () => void;
+  user: AuthUser | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  login: (credentials: LoginCredentials) => Promise<{ success: boolean; user?: AuthUser; error?: string }>;
+  register: (userData: RegisterData) => Promise<{ success: boolean; user?: AuthUser; error?: string }>;
+  logout: () => void;
+  clearError: () => void;
+  checkAuth: () => boolean;
+  isAdmin: () => boolean;
+  getUserRole: () => 'admin' | 'user' | null;
+  updateUser: (userData: Partial<AuthUser>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const { data: session, status } = useSession();
-    const [user, setUser] = useState<string | null>(null);
+  const {
+    user,
+    token,
+    isAuthenticated,
+    loading,
+    error,
+    login,
+    register,
+    logout,
+    clearError,
+    checkAuth,
+    isAdmin,
+    getUserRole,
+    updateUser,
+    initializeAuth,
+  } = useAuthStore();
 
-    // Sync NextAuth session with our local user state
-    useEffect(() => {
-        if (status === 'authenticated' && session?.user) {
-            setUser(session.user.name || session.user.email || 'User');
-        } else if (status === 'loading') {
-            // do nothing
-        } else {
-            // Fallback to local storage mock if not logged in via provider
-            // This preserves the "guest" / simple login flow we had before
-            const savedUser = localStorage.getItem('dropshapes_user');
-            if (savedUser) setUser(savedUser);
-        }
-    }, [session, status]);
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
 
-    const login = (name: string) => {
-        setUser(name);
-        localStorage.setItem('dropshapes_user', name);
-    };
+  const value: AuthContextType = {
+    user,
+    token,
+    isAuthenticated,
+    isLoading: loading,
+    error,
+    login,
+    register,
+    logout,
+    clearError,
+    checkAuth,
+    isAdmin,
+    getUserRole,
+    updateUser,
+  };
 
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem('dropshapes_user');
-        signOut({ redirect: false });
-    };
-
-    const isLoading = status === 'loading';
-
-    return (
-        <AuthContext.Provider value={{ user, isLoading, login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
-    const context = useContext(AuthContext);
-    if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 }

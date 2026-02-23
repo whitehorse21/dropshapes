@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Body
 from sqlalchemy.orm import Session
 from typing import List, Optional
+import logging
 import stripe
 import os
 from datetime import datetime, timedelta
+
+logger = logging.getLogger(__name__)
 
 from app.db.session import get_db
 from app.core.auth import get_current_active_user
@@ -47,22 +50,13 @@ if stripe_api_key:
 async def get_subscription_plans(
     db: Session = Depends(get_db)
 ):
-    """Get all available subscription plans"""
-    # Get plans that are templates (not user-specific subscriptions)
-    # Look for plans that have stripe_price_id (indicating they are plan templates)
+    """Get all available subscription plans (templates: stripe_price_id set, no subscription_id)."""
     plans = db.query(Subscription).filter(
         Subscription.is_active == True,
-        Subscription.stripe_price_id.isnot(None)  # Only plans with Stripe price IDs
+        Subscription.stripe_price_id.isnot(None),
+        Subscription.subscription_id.is_(None),
     ).all()
-    
-    # Filter out user-specific subscriptions by checking if they have payment details
-    template_plans = []
-    for plan in plans:
-        # If it has no subscription_id, it's likely a plan template, not a user subscription
-        if not plan.subscription_id:
-            template_plans.append(plan)
-    
-    return template_plans
+    return plans
 
 @router.get("/my", response_model=Optional[SubscriptionResponse])
 async def get_my_subscription(
@@ -244,17 +238,19 @@ async def cancel_subscription(
             detail="No active subscription found"
         )
     
-    # If using Stripe, cancel the subscription there as well
+    # If using Stripe, try to cancel there too (don't block DB cancel if Stripe fails)
     if subscription.payment_provider == "stripe" and subscription.subscription_id and stripe_api_key:
         try:
             stripe.Subscription.delete(subscription.subscription_id)
         except stripe.error.StripeError as e:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Stripe error: {str(e)}"
+            # Log but still deactivate in DB so user's cancel always succeeds
+            logger.warning(
+                "Stripe cancel failed for subscription %s: %s",
+                subscription.subscription_id,
+                str(e),
             )
-    
-    # Update subscription in database
+
+    # Update subscription in database (always run so cancel "works" from user perspective)
     subscription.is_active = False
     
     # Reset user's subscription token usage when cancelling
@@ -271,6 +267,53 @@ async def cancel_subscription(
     db.refresh(current_user)
     
     return subscription
+
+
+@router.post("/portal-session")
+async def create_portal_session(
+    return_url: Optional[str] = Body(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Create a Stripe Customer Portal session for managing subscription (payment method, cancel, etc.)."""
+    if not stripe_api_key:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Billing portal is not configured"
+        )
+    subscription = db.query(Subscription).filter(
+        Subscription.user_id == current_user.id,
+        Subscription.is_active == True,
+        Subscription.payment_provider == "stripe",
+        Subscription.subscription_id.isnot(None)
+    ).first()
+    if not subscription:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No active Stripe subscription found. You can subscribe to a plan first."
+        )
+    try:
+        stripe_sub = stripe.Subscription.retrieve(subscription.subscription_id, expand=["customer"])
+        customer_id = stripe_sub.customer if isinstance(stripe_sub.customer, str) else stripe_sub.customer.id
+    except stripe.error.StripeError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Stripe error: {str(e)}"
+        )
+    base_url = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000")
+    redirect_url = return_url or f"{base_url}/subscription"
+    try:
+        portal_session = stripe.billing_portal.Session.create(
+            customer=customer_id,
+            return_url=redirect_url,
+        )
+        return {"url": portal_session.url}
+    except stripe.error.StripeError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to create portal session: {str(e)}"
+        )
+
 
 @router.post("/webhook", status_code=status.HTTP_200_OK)
 async def handle_stripe_webhook(

@@ -3,19 +3,24 @@
 // Settings View Component
 
 import React from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useSettings, Settings } from '@/app/context/SettingsContext';
 import { useAuth } from '../../context/AuthContext';
 
 export default function SettingsView() {
+    const router = useRouter();
     const { settings, toggleSetting } = useSettings();
-    const { user, login } = useAuth();
+    const { user, updateUser, isAdmin } = useAuth();
+
+    const displayName = user ? (user.name || user.email || user.username || '') : '';
 
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        login(e.target.value);
+        updateUser({ name: e.target.value });
     };
 
     const handleSubscription = () => {
-        alert('Subscription portal coming soon via Stripe/Gumroad integration.');
+        router.push('/subscription');
     };
 
     const renderSwitch = (label: string, desc: string, key: keyof Settings) => {
@@ -74,7 +79,7 @@ export default function SettingsView() {
                     <input
                         type="text"
                         className="input-clean"
-                        value={user || ''}
+                        value={displayName}
                         onChange={handleNameChange}
                         aria-label="Display name"
                     />
@@ -97,7 +102,18 @@ export default function SettingsView() {
                     Manage Subscription
                 </button>
 
+                <Link href="/settings/billing" className="btn-action">
+                    Billing &amp; invoices
+                </Link>
+
                 <div className="group-title">NOTIFICATIONS</div>
+                <Link href="/settings/notifications" className="settings-item block">
+                    <div className="settings-item-content">
+                        <div className="item-title">Notification preferences</div>
+                        <div className="item-desc">Email and browser notification settings</div>
+                    </div>
+                    <span className="text-[var(--text-secondary)]" aria-hidden>→</span>
+                </Link>
                 {renderSwitch('Notifications', 'Receive alerts for updates', 'notif')}
                 {renderSwitch('Sound Effects', 'Play sounds for interactions', 'sound')}
 
@@ -120,6 +136,15 @@ export default function SettingsView() {
 
                 <div className="group-title">MODE</div>
                 {renderSwitch('Zen Mode', 'Minimal interface, reduce noise', 'zen')}
+
+                {isAdmin?.() && (
+                    <>
+                        <div className="group-title">ADMIN</div>
+                        <Link href="/admin-dashboard" className="btn-action">
+                            Admin Dashboard
+                        </Link>
+                    </>
+                )}
 
                 <div className="group-title">DATA</div>
                 <div className="settings-item">

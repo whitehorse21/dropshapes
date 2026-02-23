@@ -2,157 +2,115 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+
+const GAMES = [
+    { id: 'breathing', title: 'Breathing Focus', emoji: '🌬️', category: 'stress' as const, path: '/tools/games/breathing' },
+    { id: 'memory', title: 'Memory Match', emoji: '🧠', category: 'cognitive' as const, path: '/tools/games/memory' },
+    { id: 'scenario', title: 'Scenario Solver', emoji: '🎯', category: 'strategy' as const, path: '/tools/games/scenario' },
+    { id: 'reflex', title: 'Reflex Challenge', emoji: '⚡', category: 'cognitive' as const, path: '/tools/games/reflex' },
+    { id: 'pattern', title: 'Pattern Logic', emoji: '🕹️', category: 'cognitive' as const, path: '/tools/games/pattern' },
+    { id: 'negotiator', title: 'The Negotiator', emoji: '💬', category: 'strategy' as const, path: '/tools/games/negotiator' },
+    { id: 'gridrunner', title: 'Grid Runner', emoji: '🏃', category: 'cognitive' as const, path: '/tools/games/gridrunner' },
+    { id: 'emotional-investor', title: 'Emotional Investor', emoji: '🧠', category: 'strategy' as const, path: '/tools/games/emotional-investor' },
+];
+
+const CATEGORIES: { id: 'all' | 'stress' | 'cognitive' | 'strategy'; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'stress', label: 'Stress' },
+    { id: 'cognitive', label: 'Brain' },
+    { id: 'strategy', label: 'Strategy' },
+];
 
 export default function GameDashboard() {
     const router = useRouter();
     const [selectedCategory, setSelectedCategory] = useState<'all' | 'stress' | 'cognitive' | 'strategy'>('all');
 
-    const games = [
-        {
-            id: 'breathing',
-            title: 'Breathing Focus',
-            emoji: '🌬️',
-            category: 'stress',
-            path: '/tools/games/breathing'
-        },
-        {
-            id: 'memory',
-            title: 'Memory Match',
-            emoji: '🧠',
-            category: 'cognitive',
-            path: '/tools/games/memory'
-        },
-        {
-            id: 'scenario',
-            title: 'Scenario Solver',
-            emoji: '🎯',
-            category: 'strategy',
-            path: '/tools/games/scenario'
-        },
-        {
-            id: 'reflex',
-            title: 'Reflex Challenge',
-            emoji: '⚡',
-            category: 'cognitive',
-            path: '/tools/games/reflex'
-        },
-        {
-            id: 'pattern',
-            title: 'Pattern Logic',
-            emoji: '🕹️',
-            category: 'cognitive',
-            path: '/tools/games/pattern'
-        },
-        {
-            id: 'negotiator',
-            title: 'The Negotiator',
-            emoji: '💬',
-            category: 'strategy',
-            path: '/tools/games/negotiator'
-        },
-        {
-            id: 'gridrunner',
-            title: 'Grid Runner',
-            emoji: '🏃',
-            category: 'cognitive',
-            path: '/tools/games/gridrunner'
-        },
-        {
-            id: 'emotional-investor',
-            title: 'Emotional Investor',
-            emoji: '🧠',
-            category: 'strategy',
-            path: '/tools/games/emotional-investor'
-        }
-    ];
-
     const filteredGames = selectedCategory === 'all'
-        ? games
-        : games.filter(g => g.category === selectedCategory);
+        ? GAMES
+        : GAMES.filter(g => g.category === selectedCategory);
 
     return (
-        <div className="home-content-wrapper transition-all duration-500">
-            {/* Minimal Header matching Home */}
-            <div className="header-minimal">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '16px' }}>
-                    <button
-                        onClick={() => router.push('/')}
-                        className="control-btn"
-                        aria-label="Back to Home"
-                        title="Back to Home"
-                        style={{ margin: 0 }}
-                    >
-                        <ArrowLeft size={20} />
+        <div
+            className="games-dashboard min-h-[100dvh] flex flex-col w-full"
+            style={{
+                background: 'var(--bg)',
+                paddingTop: 'max(1.25rem, env(safe-area-inset-top))',
+                paddingLeft: 'max(1.25rem, env(safe-area-inset-left))',
+                paddingRight: 'max(1.25rem, env(safe-area-inset-right))',
+                paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))',
+                color: 'var(--text-primary)',
+            }}
+        >
+            <div className="tool-page-wrap flex-1 min-h-0 flex flex-col justify-start w-full">
+                <div className="header-minimal">
+                    <h1>Mind Hub</h1>
+                    <p>Games & mindfulness tools</p>
+                </div>
+                <div className="tool-page-nav">
+                    <button type="button" className="btn-resume" onClick={() => router.push('/')} aria-label="Back to Home">
+                        ← Back to Home
                     </button>
-                    <h1 style={{ margin: 0 }}>Mind Hub.</h1>
                 </div>
-                <p>Sharpen your mind and reduce stress.</p>
-            </div>
 
-            {/* Category Filter */}
-            <div className="chat-controls" style={{ marginBottom: '32px' }}>
-                <button
-                    className={`control-btn ${selectedCategory === 'all' ? 'active' : ''}`}
-                    onClick={() => setSelectedCategory('all')}
-                    style={{ width: 'auto', padding: '0 20px', borderRadius: '20px' }}
-                >
-                    All
-                </button>
-                <button
-                    className={`control-btn ${selectedCategory === 'stress' ? 'active' : ''}`}
-                    onClick={() => setSelectedCategory('stress')}
-                    style={{ width: 'auto', padding: '0 20px', borderRadius: '20px' }}
-                >
-                    Stress
-                </button>
-                <button
-                    className={`control-btn ${selectedCategory === 'cognitive' ? 'active' : ''}`}
-                    onClick={() => setSelectedCategory('cognitive')}
-                    style={{ width: 'auto', padding: '0 20px', borderRadius: '20px' }}
-                >
-                    Brain
-                </button>
-                <button
-                    className={`control-btn ${selectedCategory === 'strategy' ? 'active' : ''}`}
-                    onClick={() => setSelectedCategory('strategy')}
-                    style={{ width: 'auto', padding: '0 20px', borderRadius: '20px' }}
-                >
-                    Strategy
-                </button>
-            </div>
-
-            {/* Tools Section */}
-            <div className="tools-section">
-                <div className="grid-minimal">
-                    <AnimatePresence mode="popLayout">
-                        {filteredGames.map((game) => (
-                            <motion.button
-                                key={game.id}
-                                layout
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
+                {/* Category filter: theme vars (accent when selected) */}
+                <div className="flex flex-wrap justify-center gap-2 mb-6 shrink-0">
+                    {CATEGORIES.map(({ id, label }) => {
+                        const isActive = selectedCategory === id;
+                        return (
+                            <button
+                                key={id}
                                 type="button"
-                                className="tool-pill"
-                                onClick={() => {
-                                    if (game.path) {
-                                        router.push(game.path);
-                                    }
+                                onClick={() => setSelectedCategory(id)}
+                                className="control-btn"
+                                style={{
+                                    width: 'auto',
+                                    padding: '0 20px',
+                                    borderRadius: '20px',
+                                    background: isActive ? 'var(--accent-light)' : 'transparent',
+                                    borderColor: isActive ? 'var(--accent)' : 'var(--glass-border)',
+                                    color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
                                 }}
-                                aria-label={game.title}
                             >
-                                <span>{game.emoji}</span> {game.title}
-                            </motion.button>
-                        ))}
-                    </AnimatePresence>
+                                {label}
+                            </button>
+                        );
+                    })}
                 </div>
-            </div>
 
-            <div className="privacy-shield" aria-label="Privacy status" style={{ marginTop: 'auto' }}>
-                <div className="pulse-dot"></div>
-                <span>Syncing progress...</span>
+                {/* Games list: same structure as Quick Tools on home */}
+                <div className="tools-section flex-1 min-h-0 w-full flex flex-col">
+                    <div className="section-title">Choose a game</div>
+                    <div className="grid-minimal home-tools-grid flex-1 min-h-0 content-start">
+                        <AnimatePresence mode="popLayout">
+                            {filteredGames.map((game) => (
+                                <motion.button
+                                    key={game.id}
+                                    layout
+                                    initial={{ opacity: 0, y: 6 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0 }}
+                                    type="button"
+                                    className="tool-pill"
+                                    onClick={() => game.path && router.push(game.path)}
+                                    aria-label={`Play ${game.title}`}
+                                >
+                                    <span aria-hidden>{game.emoji}</span>
+                                    <span className="flex-1 min-w-0 text-left font-semibold">{game.title}</span>
+                                    <ChevronRight className="w-5 h-5 shrink-0 opacity-60" strokeWidth={2.5} aria-hidden />
+                                </motion.button>
+                            ))}
+                        </AnimatePresence>
+                    </div>
+                </div>
+
+                {/* Footer: theme tertiary text */}
+                <footer className="shrink-0 pt-6 pb-2 text-center">
+                    <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                        Progress is saved locally on your device.
+                    </p>
+                </footer>
             </div>
         </div>
     );

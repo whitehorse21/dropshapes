@@ -70,40 +70,41 @@ export default function ScenarioGame() {
                     className="w-full max-w-2xl"
                 >
                     {/* Scenario Card */}
-                    <div className="relative overflow-hidden bg-white/5 border-2 border-white/10 p-10 rounded-[40px] shadow-2xl mb-10 backdrop-blur-xl">
-                        <div className="flex items-start gap-8">
-                            <div className="hidden md:flex w-16 h-16 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-3xl items-center justify-center flex-shrink-0 shadow-lg shadow-orange-500/10">
-                                <Target size={32} className="text-orange-300" strokeWidth={2} />
+                    <div className="relative overflow-hidden bg-slate-800/50 border border-white/10 p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-2xl mb-6 sm:mb-10 backdrop-blur-xl">
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-orange-500/10 blur-[60px] rounded-full pointer-events-none" aria-hidden />
+                        <div className="flex items-start gap-4 sm:gap-6 relative">
+                            <div className="hidden sm:flex w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-orange-500/25 to-red-500/25 rounded-2xl md:rounded-3xl items-center justify-center flex-shrink-0 shadow-lg shadow-orange-500/20 border border-orange-400/20">
+                                <Target className="w-6 h-6 md:w-8 md:h-8 text-orange-300" strokeWidth={2} />
                             </div>
-                            <div className="flex-1">
-                                <h3 className="text-2xl md:text-3xl font-semibold text-white leading-relaxed mb-6">
+                            <div className="flex-1 min-w-0">
+                                <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-white leading-relaxed mb-4 sm:mb-6">
                                     {currentScene.text}
                                 </h3>
-                                <div className="h-1.5 w-24 bg-gradient-to-r from-orange-400 to-red-500 rounded-full shadow-lg shadow-orange-500/30" />
+                                <div className="h-1 w-20 bg-gradient-to-r from-orange-400 to-red-500 rounded-full" />
                             </div>
                         </div>
                     </div>
 
-                    {/* Options Grid */}
-                    <div className="grid gap-4">
+                    {/* Options */}
+                    <div className="grid gap-3 sm:gap-4">
                         {currentScene.options.map((option, index) => (
                             <motion.button
                                 key={index}
-                                initial={{ opacity: 0, x: -10 }}
+                                initial={{ opacity: 0, x: -8 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: index * 0.1 }}
+                                transition={{ delay: index * 0.08 }}
                                 onClick={() => checkScene(option.nextScene)}
-                                className="group relative overflow-hidden p-6 rounded-3xl border-2 border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/25 hover:scale-[1.01] transition-all text-left w-full flex items-center justify-between backdrop-blur-xl shadow-lg"
+                                className="group relative overflow-hidden p-4 sm:p-5 rounded-2xl border border-white/10 bg-slate-800/40 hover:bg-slate-800/70 hover:border-orange-500/30 transition-all text-left w-full flex items-center justify-between gap-3 backdrop-blur-sm min-h-[52px]"
                             >
-                                <div className="flex items-center gap-6">
-                                    <span className="flex-shrink-0 w-10 h-10 rounded-2xl border-2 border-white/20 flex items-center justify-center text-base font-bold text-white/60 group-hover:bg-gradient-to-br group-hover:from-orange-500 group-hover:to-red-500 group-hover:text-white group-hover:border-transparent transition-all shadow-lg">
+                                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                                    <span className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-white/15 flex items-center justify-center text-sm font-bold text-slate-400 group-hover:bg-orange-500/20 group-hover:text-orange-300 group-hover:border-orange-400/30 transition-all">
                                         {String.fromCharCode(65 + index)}
                                     </span>
-                                    <span className="text-white/70 group-hover:text-white transition-colors text-lg font-medium leading-relaxed">
+                                    <span className="text-slate-200 group-hover:text-white transition-colors text-base sm:text-lg font-medium leading-relaxed truncate">
                                         {option.text}
                                     </span>
                                 </div>
-                                <ChevronRight size={24} className="text-white/30 group-hover:text-white transition-all opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0" strokeWidth={2.5} />
+                                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-slate-500 group-hover:text-orange-400 transition-all shrink-0" strokeWidth={2.5} />
                             </motion.button>
                         ))}
                     </div>

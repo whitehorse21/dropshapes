@@ -76,13 +76,13 @@ class ApiService {
    * @returns {Promise} Response data
    */  async requestViaProxy(method, url, data = null, config = {}) {
     try {
-      // Convert the original API URL to proxy URL
-      // Handle the subscriptions endpoint path more carefully
       let proxyUrl = `/api/proxy-api/${url}`;
-      
-      // Remove any double slashes but preserve the path structure
       proxyUrl = proxyUrl.replace(/\/+/g, '/');
-      
+      // Append query params so the proxy forwards them to the backend
+      if (config.params && typeof config.params === 'object' && Object.keys(config.params).length > 0) {
+        const search = new URLSearchParams(config.params).toString();
+        if (search) proxyUrl += `?${search}`;
+      }
       console.log(`Making fallback request via proxy: ${proxyUrl}`);
       
       const fetchOptions = {
@@ -111,13 +111,17 @@ class ApiService {
       }
 
       const response = await fetch(proxyUrl, fetchOptions);
-      
+      const responseData = await response.json().catch(() => ({}));
+
       if (!response.ok) {
-        throw new Error(`Proxy request failed: ${response.status} ${response.statusText}`);
+        const err = new Error(response.statusText || `Request failed: ${response.status}`);
+        err.response = { status: response.status, data: responseData };
+        err.code = 'API_PROXY_ERROR';
+        const detail = responseData?.detail;
+        err.userMessage = typeof detail === 'string' ? detail : (Array.isArray(detail) ? detail.map(d => d?.msg ?? d).filter(Boolean).join(', ') : null) || `Request failed (${response.status}).`;
+        throw err;
       }
 
-      const responseData = await response.json();
-      
       // Return in axios-like format
       return {
         data: responseData,
@@ -126,9 +130,10 @@ class ApiService {
         headers: response.headers,
       };
     } catch (proxyError) {
+      if (proxyError.response) throw proxyError;
       console.error('Proxy request also failed:', proxyError);
-      proxyError.code = 'API_FALLBACK_FAILED';
-      proxyError.userMessage = 'All connection attempts failed. Please check your internet connection and try again.';
+      proxyError.code = proxyError.code || 'API_FALLBACK_FAILED';
+      proxyError.userMessage = proxyError.userMessage || 'All connection attempts failed. Please check your internet connection and try again.';
       throw proxyError;
     }
   }

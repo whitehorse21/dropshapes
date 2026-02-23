@@ -71,8 +71,16 @@ export default function useFetch(baseUrl = '') {
       setResponse(data);
       return data;
     } catch (err) {
-      setError(err);
-      throw err;    
+      const message =
+        err instanceof Error
+          ? err.message
+          : typeof err === 'object' && err !== null && typeof err.message === 'string'
+            ? err.message
+            : typeof err === 'string'
+              ? err
+              : 'Request failed';
+      setError(message);
+      throw err;
     } 
       finally 
       {

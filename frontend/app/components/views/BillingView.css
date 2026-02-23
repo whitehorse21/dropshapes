@@ -1,0 +1,179 @@
+/* Billing view: responsive layout, no overflow */
+#view-billing {
+  overflow-x: hidden;
+  min-width: 0;
+}
+
+/* Ensure Cancel Subscription button is clickable and not covered */
+#view-billing .billing-cancel-trigger {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+  cursor: pointer;
+}
+#view-billing .billing-content-wrap {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+#view-billing .billing-settings-inner {
+  min-width: 0;
+  max-width: 100%;
+}
+.billing-history-wrap {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+.billing-empty-state {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: clamp(1.5rem, 5vw, 2.5rem) clamp(1rem, 4vw, 2rem);
+  text-align: center;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+}
+
+/* Billing table */
+.billing-table-wrap {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+}
+.billing-table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+}
+.billing-table th,
+.billing-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.billing-table th {
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.billing-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.billing-table tbody tr:hover {
+  background: var(--card-hover, rgba(255, 255, 255, 0.03));
+}
+.billing-table-id {
+  font-family: ui-monospace, monospace;
+}
+.billing-table-amount {
+  font-weight: 600;
+}
+
+.billing-invoice-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+}
+.billing-invoice-card {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: clamp(0.75rem, 3vw, 1rem) clamp(1rem, 4vw, 1.25rem);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.billing-invoice-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.billing-invoice-id {
+  font-family: ui-monospace, monospace;
+  font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.billing-invoice-status {
+  flex-shrink: 0;
+  padding: 0.2em 0.5em;
+  font-size: 0.75rem;
+  border-radius: 9999px;
+}
+.billing-invoice-status--paid {
+  background: rgba(34, 197, 94, 0.2);
+  color: var(--safe-green);
+}
+.billing-invoice-status--other {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+.billing-invoice-details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+  min-width: 0;
+}
+.billing-invoice-detail {
+  display: contents;
+}
+.billing-invoice-detail dt {
+  color: var(--text-secondary);
+  margin: 0;
+}
+.billing-invoice-detail dd {
+  margin: 0;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.billing-invoice-amount {
+  font-weight: 600;
+}
+.billing-invoice-download {
+  align-self: flex-start;
+  margin-top: 0.25rem;
+  padding: 0.5rem 0;
+  font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.billing-invoice-download:hover:not(:disabled) {
+  text-decoration-thickness: 2px;
+}
+.billing-invoice-download:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

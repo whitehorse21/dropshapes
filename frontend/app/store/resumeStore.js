@@ -1,7 +1,7 @@
 import axiosInstance from "../apimodule/axiosConfig/Axios";
 import endpoints from "../apimodule/endpoints/ApiEndpoints";
 import { create } from "zustand";
-import { $resume, updateResumeData } from "../utils/resumeService";
+import { $resume, updateResumeData } from "../utils/resumeService.legacy";
 
 const useResumeStore = create((set) => ({
   loading: false,

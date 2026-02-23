@@ -22,7 +22,8 @@ from app.api.endpoints import (
     cache,
     credits,
     admin,
-    billing
+    billing,
+    drive,
 )
 
 # Create API router
@@ -39,6 +40,7 @@ api_router.include_router(cover_letter.router, prefix="/cover-letters", tags=["c
 api_router.include_router(subscriptions.router, prefix="/subscriptions", tags=["subscriptions"])
 api_router.include_router(billing.router, prefix="/billing", tags=["billing"])
 api_router.include_router(signatures.router, prefix="/signatures", tags=["signatures"])
+api_router.include_router(drive.router, prefix="/drive", tags=["drive"])
 api_router.include_router(credits.router, prefix="/credits", tags=["credits"])
 
 # Educational Content Only

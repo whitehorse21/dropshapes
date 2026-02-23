@@ -4,8 +4,9 @@ import { autoDetectAPI } from '../utils/connectionTest';
 // Base URL configuration with HTTPS enforcement and trailing slash handling
 let baseURL = process.env.NEXT_PUBLIC_API_URL;
 
-// 1. Always ensure HTTPS to avoid protocol changes in redirects
-if (baseURL?.startsWith('http://')) {
+// 1. Ensure HTTPS for production; keep HTTP for localhost (backend typically has no SSL in dev)
+const isLocalhost = baseURL?.includes('localhost') || baseURL?.includes('127.0.0.1');
+if (baseURL?.startsWith('http://') && !isLocalhost) {
   baseURL = baseURL.replace('http://', 'https://');
 }
 
@@ -50,18 +51,23 @@ axiosInstance.interceptors.request.use(
     }
       // Fix URL path to avoid redirects that can cause CORS preflight issues
     if (config.url) {
-      // 1. Ensure we're using HTTPS for all requests
-      if (config.url.startsWith('http://')) {
+      // 1. Ensure HTTPS for production URLs only; keep HTTP for localhost
+      const fullUrl = (config.baseURL || '') + config.url;
+      const urlIsLocalhost = fullUrl.includes('localhost') || fullUrl.includes('127.0.0.1');
+      if (config.url.startsWith('http://') && !urlIsLocalhost) {
         config.url = config.url.replace('http://', 'https://');
       }      // 2. Special handling for endpoints that don't accept trailing slashes
       // These cause redirects that break CORS
       if (config.url.includes('subscriptions/') || 
           config.url.includes('auth/') ||
-          config.url.match(/^resumes\/\d+$/) || // Resume by ID endpoints (e.g., resumes/11)
+          config.url.startsWith('admin/') || // Admin endpoints (no trailing slash)
+          config.url === 'resumes/json' || // POST create resume (no trailing slash)
+          config.url.match(/^resumes\/\d+/) || // Resume by ID endpoints (e.g., resumes/11)
           config.url.match(/^cover-letters\/\d+$/) || // Cover letter by ID endpoints
           config.url.match(/\/\d+$/) || // Any endpoint ending with a number (resource by ID)
           config.url.includes('/duplicate/') || // Duplicate endpoints
-          config.url.includes('/clone/')) { // Clone endpoints
+          config.url.includes('/clone/') || // Clone endpoints
+          config.url.includes('drive/import')) { // Drive bulk import
         // Remove trailing slash for these endpoints to prevent redirects
         if (config.url.endsWith('/')) {
           config.url = config.url.slice(0, -1);

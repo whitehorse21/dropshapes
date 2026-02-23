@@ -41,19 +41,16 @@ export function middleware(request) {
     }
   }
 
-  // Handle trailing slashes for both /proxy-api/ and /api/ routes to prevent redirects
-  if ((request.nextUrl.pathname.startsWith('/proxy-api/') || request.nextUrl.pathname.startsWith('/api/')) && 
+  // Handle trailing slashes for /api/ routes (but NOT /api/proxy-api/) to prevent redirects.
+  // Proxy-api paths must not get a trailing slash or the backend receives admin/users/ and may 404.
+  if (request.nextUrl.pathname.startsWith('/api/') &&
+      !request.nextUrl.pathname.startsWith('/api/proxy-api/') &&
       !request.nextUrl.pathname.endsWith('/')) {
-    // Redirect to the same URL but with a trailing slash to prevent server-side redirects
     const url = request.nextUrl.clone();
     url.pathname = `${url.pathname}/`;
-    
-    // Don't redirect preflight requests as browsers don't follow redirects for OPTIONS
-    if (request.method === 'OPTIONS') {
-      return NextResponse.next();
+    if (request.method !== 'OPTIONS') {
+      return NextResponse.redirect(url, 308);
     }
-    
-    return NextResponse.redirect(url, 308); // 308 is a permanent redirect preserving the method
   }
   
   const origin = request.headers.get('origin') || '*';  

@@ -38,11 +38,42 @@ const endpoints = {
   canCreateResume: formatSubscriptionEndpoint('subscriptions/can-create-resume'),
   canCreateCoverLetter: formatSubscriptionEndpoint('subscriptions/can-create-cover-letter'),
   mySubscription: formatSubscriptionEndpoint('subscriptions/my'), // Get current user's subscription
-  subscribeToplan: formatSubscriptionEndpoint('subscriptions/subscribe'), // Subscribe to a plan  
-  
+  subscribeToplan: formatSubscriptionEndpoint('subscriptions/subscribe'), // Subscribe to a plan
+  subscriptionCancel: formatSubscriptionEndpoint('subscriptions/cancel'), // Cancel current subscription
+  subscriptionPortal: formatSubscriptionEndpoint('subscriptions/portal-session'), // Stripe billing portal  
+
+  // Billing (history + invoice details by invoice_number)
+  billingHistory: formatSubscriptionEndpoint('billing/history'),
+  billingInvoice: (invoiceNumber) => `billing/invoices/${invoiceNumber}`,
+
+  // Admin
+  adminDashboardStats: formatSubscriptionEndpoint('admin/dashboard/stats'),
+  adminDashboardFeatureUsage: formatSubscriptionEndpoint('admin/dashboard/feature-usage'),
+  adminUsers: formatSubscriptionEndpoint('admin/users'),
+  adminUsersSearch: formatSubscriptionEndpoint('admin/users/search'),
+  adminUsersCount: formatSubscriptionEndpoint('admin/users/count'),
+  adminUserSubscriptions: formatSubscriptionEndpoint('subscriptions/admin/user-subscriptions'),
+  adminPlansCreate: formatSubscriptionEndpoint('subscriptions/admin/plans'),
+  adminPlansUpdate: (planId) => `subscriptions/admin/plans/${planId}`,
+  adminContactList: formatEndpoint('contact'),
+  adminContactDelete: (id) => `contact/${id}`,
+  adminCreditsAdd: formatSubscriptionEndpoint('auth/credits/add'),
+  adminCreditsGiveTrial: formatSubscriptionEndpoint('auth/credits/give-trial'),
+
   // Resume and cover letter endpoints
   resumes: 'resumes',
   coverLetters: formatEndpoint('cover-letters'),
+
+  // Drive (notes and files)
+  drive: formatEndpoint('drive'),
+  driveImport: 'drive/import',
+
+  // Task list (backend prefix /tasks)
+  tasksList: formatEndpoint('tasks'),
+
+  // Interview training
+  interviewTraining: 'interview-training',
+  interviewTrainingPerformance: 'interview-training/performance',
 
   // AI Services endpoints
   ai: {

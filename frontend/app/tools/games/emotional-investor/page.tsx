@@ -114,10 +114,10 @@ export default function EmotionalInvestorGame() {
             {gameState === 'idle' && (
                 <GameCard title="The Emotional Investor" icon={<Brain className="w-6 h-6" />}>
                     <div className="text-center space-y-6">
-                        <div className="text-6xl mb-4">🧠</div>
-                        <h3 className="text-2xl font-bold text-white">Manage Your Mental Resources</h3>
-                        <p className="text-slate-400 text-lg leading-relaxed">
-                            Navigate 5 daily scenarios while balancing your <span className="text-green-400 font-semibold">Energy</span>, <span className="text-blue-400 font-semibold">Social Battery</span>, and <span className="text-yellow-400 font-semibold">Patience</span>.
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto bg-gradient-to-br from-violet-500/25 to-purple-500/25 rounded-2xl flex items-center justify-center text-4xl sm:text-5xl border border-violet-400/20 shadow-lg shadow-violet-500/20">🧠</div>
+                        <h3 className="text-xl sm:text-2xl font-bold text-white">Manage Your Mental Resources</h3>
+                        <p className="text-slate-300 text-base sm:text-lg leading-relaxed">
+                            Navigate 5 daily scenarios while balancing <span className="text-green-400 font-semibold">Energy</span>, <span className="text-blue-400 font-semibold">Social Battery</span>, and <span className="text-amber-400 font-semibold">Patience</span>.
                         </p>
                         <p className="text-slate-500 text-sm">
                             If any resource hits 0, you experience burnout. Make strategic choices to survive the week!
@@ -140,12 +140,12 @@ export default function EmotionalInvestorGame() {
 
                     {/* Progress */}
                     <div className="mb-6 text-center">
-                        <span className="text-slate-500 text-sm">Scenario {currentScenario + 1} of {SCENARIOS.length}</span>
+                        <span className="bg-slate-800/60 backdrop-blur-sm px-3 py-1.5 rounded-lg text-slate-400 text-sm font-medium border border-white/10">Scenario {currentScenario + 1} of {SCENARIOS.length}</span>
                     </div>
 
                     {/* Scenario Card */}
                     <GameCard title={`Day ${currentScenario + 1}`} icon={<AlertTriangle className="w-6 h-6" />}>
-                        <p className="text-slate-300 text-lg leading-relaxed mb-8">
+                        <p className="text-slate-300 text-base sm:text-lg leading-relaxed mb-6 sm:mb-8">
                             {SCENARIOS[currentScenario].situation}
                         </p>
 
@@ -154,15 +154,15 @@ export default function EmotionalInvestorGame() {
                                 <button
                                     key={index}
                                     onClick={() => handleChoice(choice)}
-                                    className="w-full text-left p-5 rounded-xl border-2 border-slate-700 bg-slate-800/30 hover:bg-slate-800/50 hover:border-slate-600 transition-all group"
+                                    className="w-full text-left p-4 sm:p-5 rounded-xl border border-white/10 bg-slate-800/40 hover:bg-slate-800/60 hover:border-white/20 transition-all group min-h-[52px]"
                                 >
-                                    <div className="flex items-start gap-4">
-                                        <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg font-bold text-sm bg-slate-700 text-slate-200">
+                                    <div className="flex items-start gap-3 sm:gap-4">
+                                        <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg font-bold text-sm bg-slate-700/80 text-slate-200 border border-white/5">
                                             {String.fromCharCode(65 + index)}
                                         </span>
-                                        <div className="flex-1">
-                                            <p className="text-lg text-slate-200 group-hover:text-slate-50 mb-2">{choice.text}</p>
-                                            <div className="flex gap-4 text-xs">
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-base sm:text-lg text-slate-200 group-hover:text-white mb-1.5 sm:mb-2">{choice.text}</p>
+                                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
                                                 <span className={choice.energyCost > 0 ? 'text-green-400' : 'text-red-400'}>
                                                     Energy: {choice.energyCost > 0 ? '+' : ''}{choice.energyCost}
                                                 </span>
@@ -185,25 +185,25 @@ export default function EmotionalInvestorGame() {
             {gameState === 'won' && (
                 <GameCard title="Victory!" icon={<Trophy className="w-6 h-6" />}>
                     <div className="text-center space-y-6">
-                        <div className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
-                            <Trophy className="w-12 h-12 text-green-400" />
+                        <div className="w-24 h-24 bg-gradient-to-br from-emerald-500/30 to-green-600/30 rounded-2xl flex items-center justify-center mx-auto border border-emerald-400/20 shadow-lg shadow-emerald-500/20">
+                            <Trophy className="w-12 h-12 text-emerald-300" />
                         </div>
-                        <h3 className="text-3xl font-bold text-white">You Survived the Week!</h3>
-                        <p className="text-slate-400 text-lg">
+                        <h3 className="text-2xl sm:text-3xl font-bold text-white">You Survived the Week!</h3>
+                        <p className="text-slate-300 text-base sm:text-lg">
                             You successfully balanced your mental resources and avoided burnout.
                         </p>
                         <div className="grid grid-cols-3 gap-3 my-6">
-                            <div className="bg-slate-800/50 p-4 rounded-xl">
-                                <div className={`text-2xl font-bold ${getStatColor(energy)}`}>{energy}%</div>
-                                <div className="text-slate-500 text-sm">Energy</div>
+                            <div className="bg-slate-800/60 backdrop-blur-sm p-4 rounded-xl border border-white/10">
+                                <div className={`text-xl sm:text-2xl font-bold ${getStatColor(energy)}`}>{energy}%</div>
+                                <div className="text-slate-500 text-xs sm:text-sm">Energy</div>
                             </div>
-                            <div className="bg-slate-800/50 p-4 rounded-xl">
-                                <div className={`text-2xl font-bold ${getStatColor(socialBattery)}`}>{socialBattery}%</div>
-                                <div className="text-slate-500 text-sm">Social</div>
+                            <div className="bg-slate-800/60 backdrop-blur-sm p-4 rounded-xl border border-white/10">
+                                <div className={`text-xl sm:text-2xl font-bold ${getStatColor(socialBattery)}`}>{socialBattery}%</div>
+                                <div className="text-slate-500 text-xs sm:text-sm">Social</div>
                             </div>
-                            <div className="bg-slate-800/50 p-4 rounded-xl">
-                                <div className={`text-2xl font-bold ${getStatColor(patience)}`}>{patience}%</div>
-                                <div className="text-slate-500 text-sm">Patience</div>
+                            <div className="bg-slate-800/60 backdrop-blur-sm p-4 rounded-xl border border-white/10">
+                                <div className={`text-xl sm:text-2xl font-bold ${getStatColor(patience)}`}>{patience}%</div>
+                                <div className="text-slate-500 text-xs sm:text-sm">Patience</div>
                             </div>
                         </div>
                         <GameButton variant="success" onClick={startGame}>
@@ -216,14 +216,14 @@ export default function EmotionalInvestorGame() {
             {gameState === 'lost' && (
                 <GameCard title="Burnout!" icon={<AlertTriangle className="w-6 h-6" />}>
                     <div className="text-center space-y-6">
-                        <div className="w-24 h-24 bg-red-500/20 rounded-full flex items-center justify-center mx-auto">
-                            <AlertTriangle className="w-12 h-12 text-red-400" />
+                        <div className="w-24 h-24 bg-gradient-to-br from-red-500/30 to-rose-900/40 rounded-2xl flex items-center justify-center mx-auto border border-red-400/20 shadow-lg shadow-red-500/20">
+                            <AlertTriangle className="w-12 h-12 text-red-300" />
                         </div>
-                        <h3 className="text-3xl font-bold text-white">You Experienced Burnout</h3>
-                        <p className="text-slate-400 text-lg">
-                            One of your resources hit zero. Remember: your mental health is a budget that must be managed carefully.
+                        <h3 className="text-2xl sm:text-3xl font-bold text-white">You Experienced Burnout</h3>
+                        <p className="text-slate-300 text-base sm:text-lg">
+                            One of your resources hit zero. Your mental health is a budget—manage it carefully.
                         </p>
-                        <div className="bg-red-900/20 border border-red-500/30 p-4 rounded-xl text-red-300 text-sm">
+                        <div className="bg-red-900/20 border border-red-500/30 p-4 rounded-xl text-red-200 text-sm">
                             {energy === 0 && "Your energy reserves were completely depleted."}
                             {socialBattery === 0 && "Your social battery ran out completely."}
                             {patience === 0 && "You ran out of patience."}

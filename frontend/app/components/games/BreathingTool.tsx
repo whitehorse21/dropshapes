@@ -41,10 +41,11 @@ export default function BreathingTool() {
 
     return (
         <GameLayout title="Breathing Focus" subtitle="Mindfulness">
-            <div className="flex flex-col items-center justify-center w-full max-w-xl mx-auto gap-12">
+            <div className="flex flex-col items-center justify-center w-full max-w-xl mx-auto gap-8 sm:gap-10 md:gap-12 px-2">
 
                 {/* Breathing Visual */}
-                <div className="relative w-80 h-80 md:w-96 md:h-96 flex items-center justify-center">
+                <div className="relative w-64 h-64 min-w-[200px] min-h-[200px] sm:w-80 sm:h-80 md:w-96 md:h-96 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" aria-hidden />
                     {/* Background Pulse */}
                     <motion.div
                         className="absolute inset-0 rounded-full"
@@ -60,10 +61,9 @@ export default function BreathingTool() {
 
                     {/* Main Circle */}
                     <motion.div
-                        className="w-full h-full rounded-full border-[8px] flex items-center justify-center relative z-10 backdrop-blur-2xl shadow-[0_0_80px_rgba(59,130,246,0.2)]"
+                        className="w-full h-full rounded-full border-[8px] flex items-center justify-center relative z-10 backdrop-blur-2xl shadow-[0_0_60px_rgba(59,130,246,0.15)] border-white/20"
                         style={{
-                            borderColor: 'rgba(255, 255, 255, 0.15)',
-                            background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)'
+                            background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 100%)'
                         }}
                         animate={{
                             scale: phase === 'inhale' ? 1 : phase === 'hold' ? 1 : 0.7,
@@ -110,9 +110,9 @@ export default function BreathingTool() {
                 <div className="flex flex-col items-center w-full max-w-sm gap-8">
                     <button
                         onClick={() => setIsActive(!isActive)}
-                        className={`w-full py-5 rounded-3xl font-bold text-lg flex items-center justify-center gap-3 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-2xl ${isActive
-                                ? 'bg-white/10 text-white border-2 border-white/20 hover:bg-white/15 hover:border-red-400/40 hover:text-red-300 backdrop-blur-xl'
-                                : 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-[0_0_40px_rgba(59,130,246,0.3)] hover:shadow-[0_0_50px_rgba(59,130,246,0.4)]'
+                        className={`w-full py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all duration-300 shadow-xl ${isActive
+                                ? 'bg-slate-800/60 text-white border border-white/20 hover:border-red-400/40 hover:text-red-300 backdrop-blur-xl'
+                                : 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border border-blue-400/20 shadow-[0_0_40px_rgba(59,130,246,0.25)] hover:from-blue-400 hover:to-cyan-400'
                             }`}
                         aria-label={isActive ? "Stop Session" : "Start Session"}
                     >
