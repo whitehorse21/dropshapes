@@ -39,6 +39,7 @@ const endpoints = {
   canCreateCoverLetter: formatSubscriptionEndpoint('subscriptions/can-create-cover-letter'),
   mySubscription: formatSubscriptionEndpoint('subscriptions/my'), // Get current user's subscription
   subscribeToplan: formatSubscriptionEndpoint('subscriptions/subscribe'), // Subscribe to a plan
+  subscriptionCreateCheckoutSession: formatSubscriptionEndpoint('subscriptions/create-checkout-session'), // Stripe Checkout redirect
   subscriptionCancel: formatSubscriptionEndpoint('subscriptions/cancel'), // Cancel current subscription
   subscriptionPortal: formatSubscriptionEndpoint('subscriptions/portal-session'), // Stripe billing portal  
 

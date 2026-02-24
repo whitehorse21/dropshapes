@@ -13,6 +13,9 @@ interface SubscriptionModalProps {
   planPrice: number;
   onClose: () => void;
   onSuccess: () => void;
+  onStripeCheckout?: () => void;
+  checkoutLoading?: boolean;
+  stripePriceId?: string | null;
 }
 
 export default function SubscriptionModal({
@@ -21,6 +24,9 @@ export default function SubscriptionModal({
   planPrice,
   onClose,
   onSuccess,
+  onStripeCheckout,
+  checkoutLoading = false,
+  stripePriceId,
 }: SubscriptionModalProps) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<{
@@ -167,6 +173,18 @@ export default function SubscriptionModal({
           </p>
         )}
 
+        {stripePriceId && onStripeCheckout && (
+          <p className="subscription-modal-checkout-link">
+            <button
+              type="button"
+              onClick={onStripeCheckout}
+              disabled={checkoutLoading || loading}
+              className="subscription-modal-checkout-btn"
+            >
+              {checkoutLoading ? 'Redirecting…' : 'Or continue to Stripe Checkout'}
+            </button>
+          </p>
+        )}
         <div className="subscription-modal-actions">
           <button
             type="button"

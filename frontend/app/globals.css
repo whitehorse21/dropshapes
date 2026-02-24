@@ -5275,6 +5275,27 @@ body.high-contrast-mode .admin-page-header h1 {
   line-height: 1.4;
 }
 
+.subscription-modal-checkout-link {
+  margin: 0.75rem 0 0;
+  text-align: center;
+}
+.subscription-modal-checkout-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0.25rem 0;
+}
+.subscription-modal-checkout-btn:hover:not(:disabled) {
+  color: var(--primary-hover, var(--primary));
+}
+.subscription-modal-checkout-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .subscription-modal-actions {
   display: flex;
   flex-wrap: wrap;

@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Body
+from fastapi import APIRouter, Depends, HTTPException, status, Body, Request, Header
 from sqlalchemy.orm import Session
 from typing import List, Optional
+import json
 import logging
-import stripe
 import os
 from datetime import datetime, timedelta
+
+import stripe
 
 logger = logging.getLogger(__name__)
 
@@ -269,6 +271,53 @@ async def cancel_subscription(
     return subscription
 
 
+@router.post("/create-checkout-session")
+async def create_checkout_session(
+    plan_id: int = Body(..., embed=True),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Create a Stripe Checkout Session for subscription. Redirect user to returned URL to complete payment. Webhook will create DB subscription."""
+    if not stripe_api_key:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Stripe is not configured"
+        )
+    plan = db.query(Subscription).filter(
+        Subscription.id == plan_id,
+        Subscription.is_active == True,
+        Subscription.stripe_price_id.isnot(None),
+        Subscription.subscription_id.is_(None),
+    ).first()
+    if not plan:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Plan not found or not available for Stripe Checkout"
+        )
+    base_url = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000")
+    success_url = f"{base_url}/subscription/success?session_id={{CHECKOUT_SESSION_ID}}"
+    cancel_url = f"{base_url}/subscription?canceled=true"
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[{"price": plan.stripe_price_id, "quantity": 1}],
+            mode="subscription",
+            success_url=success_url,
+            cancel_url=cancel_url,
+            client_reference_id=str(current_user.id),
+            customer_email=current_user.email,
+            metadata={"plan": plan.name, "plan_id": str(plan.id)},
+            allow_promotion_codes=True,
+            subscription_data={"metadata": {"user_id": str(current_user.id)}},
+        )
+        return {"url": session.url, "sessionId": session.id}
+    except stripe.error.StripeError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Stripe error: {str(e)}"
+        )
+
+
 @router.post("/portal-session")
 async def create_portal_session(
     return_url: Optional[str] = Body(None),
@@ -317,37 +366,122 @@ async def create_portal_session(
 
 @router.post("/webhook", status_code=status.HTTP_200_OK)
 async def handle_stripe_webhook(
-    payload: dict = Body(...),
-    signature: str = None,
-    db: Session = Depends(get_db)
+    request: Request,
+    db: Session = Depends(get_db),
+    stripe_signature: Optional[str] = Header(None, alias="Stripe-Signature"),
 ):
-    """Handle Stripe webhooks for subscription events"""
+    """Handle Stripe webhooks for subscription events. Uses raw body for signature verification."""
     if not stripe_api_key:
         return {"status": "success", "message": "Stripe not configured, ignoring webhook"}
     
     webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
+    raw_body = await request.body()
     
-    if webhook_secret and signature:
+    if webhook_secret and stripe_signature:
         try:
-            # Verify the event
             event = stripe.Webhook.construct_event(
-                payload, signature, webhook_secret
+                raw_body, stripe_signature, webhook_secret
             )
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Webhook error: {str(e)}"
-            )
+        except ValueError as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid payload: {e}")
+        except stripe.error.SignatureVerificationError as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid signature: {e}")
     else:
-        event = payload
-      # Handle the event
+        try:
+            event = json.loads(raw_body.decode("utf-8"))
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid JSON: {e}")
+    
     event_type = event.get("type")
     event_data = event.get("data", {}).get("object", {})
     
     if event_type == "checkout.session.completed":
         session = event_data
-        print(f"Checkout session completed: {session.get('id')}")
-        # Handle successful checkout session completion
+        session_id = session.get("id")
+        subscription_id = session.get("subscription")
+        client_reference_id = session.get("client_reference_id")
+        customer_email = (session.get("customer_email") or session.get("customer_details", {}).get("email") or "").strip()
+        
+        if not subscription_id:
+            logger.warning("Checkout session %s has no subscription", session_id)
+            return {"status": "success"}
+        
+        # Already have a DB subscription for this Stripe subscription (e.g. from direct subscribe)?
+        existing = db.query(Subscription).filter(Subscription.subscription_id == subscription_id).first()
+        if existing:
+            return {"status": "success"}
+        
+        # Resolve user: client_reference_id is user_id when session was created with it
+        user_id = None
+        if client_reference_id:
+            try:
+                user_id = int(client_reference_id)
+            except (ValueError, TypeError):
+                pass
+        if user_id is None and customer_email:
+            user = db.query(User).filter(User.email == customer_email).first()
+            if user:
+                user_id = user.id
+        
+        if not user_id:
+            logger.warning("Checkout session %s: cannot resolve user (client_reference_id=%s, email=%s)", session_id, client_reference_id, customer_email)
+            return {"status": "success"}
+        
+        # Retrieve Stripe subscription to get price and period
+        try:
+            stripe_sub = stripe.Subscription.retrieve(subscription_id, expand=["items.data.price"])
+        except stripe.error.StripeError as e:
+            logger.exception("Stripe retrieve subscription failed: %s", e)
+            return {"status": "success"}
+        
+        stripe_price_id = None
+        if stripe_sub.get("items", {}).get("data"):
+            first_item = stripe_sub["items"]["data"][0]
+            price = first_item.get("price") or {}
+            stripe_price_id = price.get("id")
+        
+        if not stripe_price_id:
+            logger.warning("Checkout session %s: no price on subscription", session_id)
+            return {"status": "success"}
+        
+        plan = db.query(Subscription).filter(
+            Subscription.stripe_price_id == stripe_price_id,
+            Subscription.subscription_id.is_(None),
+            Subscription.is_active == True,
+        ).first()
+        if not plan:
+            logger.warning("Checkout session %s: no plan found for price %s", session_id, stripe_price_id)
+            return {"status": "success"}
+        
+        # Deactivate any existing active subscription for this user
+        for sub in db.query(Subscription).filter(Subscription.user_id == user_id, Subscription.is_active == True).all():
+            sub.is_active = False
+        db.commit()
+        
+        period_start = datetime.fromtimestamp(stripe_sub["current_period_start"])
+        period_end = datetime.fromtimestamp(stripe_sub["current_period_end"])
+        db_subscription = Subscription(
+            user_id=user_id,
+            name=plan.name,
+            description=plan.description,
+            price=plan.price,
+            interval=plan.interval,
+            is_active=True,
+            features=plan.features,
+            resume_limit=plan.resume_limit,
+            cover_letter_limit=plan.cover_letter_limit,
+            ai_credits_limit=plan.ai_credits_limit or get_plan_ai_credits(plan.name),
+            payment_provider="stripe",
+            subscription_id=stripe_sub["id"],
+            stripe_price_id=stripe_price_id,
+            current_period_start=period_start,
+            current_period_end=period_end,
+        )
+        db.add(db_subscription)
+        db.commit()
+        db.refresh(db_subscription)
+        SubscriptionService.handle_subscription_renewal_or_upgrade(db, user_id, db_subscription)
+        logger.info("Created subscription from checkout session %s for user_id=%s plan=%s", session_id, user_id, plan.name)
         
     elif event_type == "customer.subscription.created":
         subscription = event_data
@@ -396,19 +530,27 @@ async def handle_stripe_webhook(
         invoice = event_data
         subscription_id = invoice.get("subscription")
         invoice_id = invoice.get("id")
-        amount_paid = invoice.get("amount_paid", 0) / 100  # Convert from cents
         
-        # Find the subscription in our database
+        # Avoid duplicate: check if we already have an invoice for this Stripe invoice
+        existing_invoice = db.query(Invoice).filter(Invoice.external_invoice_id == invoice_id).first()
+        if existing_invoice:
+            if existing_invoice.payment_status != "paid":
+                BillingService.mark_invoice_as_paid(
+                    db=db,
+                    invoice=existing_invoice,
+                    payment_method="stripe",
+                    external_invoice_id=invoice_id
+                )
+            return {"status": "success"}
+        
         db_subscription = db.query(Subscription).filter(
             Subscription.subscription_id == subscription_id
         ).first()
         
         if db_subscription:
-            # Create an invoice record in our database
             billing_period_start = datetime.fromtimestamp(invoice.get("period_start", 0))
             billing_period_end = datetime.fromtimestamp(invoice.get("period_end", 0))
             
-            # Create invoice using billing service
             invoice_record = BillingService.create_subscription_invoice(
                 db=db,
                 user_id=db_subscription.user_id,
@@ -417,15 +559,13 @@ async def handle_stripe_webhook(
                 billing_period_end=billing_period_end
             )
             
-            # Mark it as paid immediately since payment succeeded
             BillingService.mark_invoice_as_paid(
                 db=db,
                 invoice=invoice_record,
                 payment_method="stripe",
                 external_invoice_id=invoice_id
             )
-            
-            print(f"Invoice payment succeeded and recorded: {invoice_id}")
+            logger.info("Invoice payment succeeded and recorded: %s", invoice_id)
         
     elif event_type == "payment_intent.payment_failed":
         payment_intent = event_data

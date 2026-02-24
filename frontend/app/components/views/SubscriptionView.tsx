@@ -26,6 +26,7 @@ export default function SubscriptionView({
   const [portalLoading, setPortalLoading] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const fetchPlans = async () => {
     try {
@@ -77,6 +78,25 @@ export default function SubscriptionView({
       );
     } finally {
       setPortalLoading(false);
+    }
+  };
+
+  const handleStripeCheckout = async (planId: number) => {
+    setCheckoutLoading(true);
+    try {
+      const res = await apiService.post(endpoints.subscriptionCreateCheckoutSession, { plan_id: planId });
+      const url = (res.data as { url?: string })?.url;
+      if (url) window.location.href = url;
+      else throw new Error("No checkout URL");
+    } catch (err: unknown) {
+      const msg =
+        err &&
+        typeof err === "object" &&
+        "response" in err &&
+        (err.response as { data?: { detail?: string } })?.data?.detail;
+      alert(typeof msg === "string" ? msg : "Could not start checkout. Try paying with card above.");
+    } finally {
+      setCheckoutLoading(false);
     }
   };
 
@@ -205,15 +225,20 @@ export default function SubscriptionView({
         )}
 
         {selectedPlanId != null && selectedPlan && stripeAvailable && (
-          <SubscriptionModal
-            planId={selectedPlanId}
-            planName={selectedPlan.name}
-            planPrice={selectedPlan.price}
-            onClose={() => setSelectedPlanId(null)}
-            onSuccess={() => {
-              fetchMySubscription();
-            }}
-          />
+          <>
+            <SubscriptionModal
+              planId={selectedPlanId}
+              planName={selectedPlan.name}
+              planPrice={selectedPlan.price}
+              onClose={() => setSelectedPlanId(null)}
+              onSuccess={() => {
+                fetchMySubscription();
+              }}
+              onStripeCheckout={() => handleStripeCheckout(selectedPlanId)}
+              checkoutLoading={checkoutLoading}
+              stripePriceId={selectedPlan.stripe_price_id}
+            />
+          </>
         )}
         {selectedPlanId != null && selectedPlan && !stripeAvailable && (
           <SimpleSubscribeModal
