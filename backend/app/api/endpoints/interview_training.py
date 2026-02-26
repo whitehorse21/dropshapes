@@ -224,13 +224,14 @@ async def generate_mock_interview(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/performance", response_model=PerformanceResponse)
-async def get_user_performance(
+def get_user_performance(
     userId: str = Query(..., description="User ID for performance tracking"),
     db: Session = Depends(get_db)
 ):
     """
     Get comprehensive performance tracking for a user.
     Includes interview history, strengths, weaknesses, and trends.
+    FastAPI runs this sync handler in a thread pool so the event loop is not blocked.
     """
     try:
         interview_service = InterviewTrainingService()

@@ -14,6 +14,15 @@ interface SessionRecord {
   topic: string;
 }
 
+function formatSessionDate(iso: string): string {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch {
+    return iso;
+  }
+}
+
 interface PerformanceData {
   user_id: string;
   interviews_taken: number;
@@ -40,13 +49,22 @@ function PerformanceContent() {
     setError(null);
     const userId = String(user.id);
     axiosInstance
-      .get<PerformanceData>(ApiEndpoints.interviewTrainingPerformance, { params: { userId } })
+      .get<PerformanceData>(ApiEndpoints.interviewTrainingPerformance, {
+        params: { userId },
+        timeout: 30000,
+      })
       .then((res) => {
         if (!cancelled) setData(res.data);
       })
       .catch((err) => {
         if (!cancelled) {
-          const message = err.response?.data?.detail ?? err.message ?? 'Failed to load performance';
+          let message: string;
+          if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+            message = 'Request timed out. The server may be busy. Please try again.';
+          } else {
+            message =
+              err.response?.data?.detail ?? err.message ?? 'Failed to load performance';
+          }
           setError(typeof message === 'string' ? message : JSON.stringify(message));
         }
       })
@@ -128,7 +146,7 @@ function PerformanceContent() {
             {data.strengths && data.strengths.length > 0 && (
               <div className="interview-performance-card">
                 <p className="interview-performance-card-title">Strengths</p>
-                <ul className="interview-performance-list">
+                <ul className="interview-performance-list interview-performance-list--strengths">
                   {data.strengths.map((s, i) => (
                     <li key={i}>{s}</li>
                   ))}
@@ -149,28 +167,23 @@ function PerformanceContent() {
 
             {data.recent_sessions && data.recent_sessions.length > 0 && (
               <div className="interview-performance-card">
-                <p className="interview-performance-card-title">Recent sessions</p>
-                <div className="interview-performance-table-wrap">
-                  <table className="interview-performance-table" aria-label="Recent interview sessions">
-                    <thead>
-                      <tr>
-                        <th>Topic</th>
-                        <th>Date</th>
-                        <th>Score</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {[...data.recent_sessions]
-                        .sort((a, b) => (b.date > a.date ? 1 : b.date < a.date ? -1 : 0))
-                        .map((s) => (
-                          <tr key={s.session_id}>
-                            <td>{s.topic}</td>
-                            <td>{s.date}</td>
-                            <td>{s.score.toFixed(1)}%</td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
+                <p className="interview-performance-sessions-header">Recent sessions</p>
+                <div className="interview-performance-sessions-grid" role="list" aria-label="Recent interview sessions">
+                  {[...data.recent_sessions]
+                    .sort((a, b) => (b.date > a.date ? 1 : b.date < a.date ? -1 : 0))
+                    .map((s) => (
+                      <article
+                        key={s.session_id}
+                        className="interview-performance-session-card"
+                        role="listitem"
+                      >
+                        <h3 className="interview-performance-session-topic">{s.topic}</h3>
+                        <div className="interview-performance-session-meta">
+                          <span className="interview-performance-session-date">{formatSessionDate(s.date)}</span>
+                          <span className="interview-performance-session-score">{s.score.toFixed(1)}%</span>
+                        </div>
+                      </article>
+                    ))}
                 </div>
               </div>
             )}

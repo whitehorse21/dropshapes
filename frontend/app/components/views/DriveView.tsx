@@ -196,70 +196,18 @@ export default function DriveView() {
         confirmLabel="Delete"
         loading={deleteLoading}
       />
-      <div className="drive-header">
-        <div className="header-minimal drive-title-block">
-          <h1>Drive</h1>
-          <p>All your saved thoughts and files</p>
-        </div>
-        <div className="drive-actions">
-          <button
-            type="button"
-            className="btn-primary"
-            onClick={openNewNoteModal}
-            disabled={loading}
-          >
-            <svg
-              width="18"
-              height="18"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path d="M12 4v16m8-8H4" />
-            </svg>
-            New Note
-          </button>
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={openImportModal}
-            disabled={loading}
-          >
-            <svg
-              width="18"
-              height="18"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2 2v-4M17 8l-5-5-5 5M12 3v12" />
-            </svg>
-            Import
-          </button>
-        </div>
-      </div>
-
-      {error && (
-        <div className="drive-error-banner" role="alert">
-          <p className="drive-error-message">{error}</p>
-          <div className="drive-error-actions">
+      <div className="drive-page-content">
+        <div className="drive-header">
+          <div className="header-minimal drive-title-block">
+            <h1>Drive</h1>
+            <p>All your saved thoughts and files</p>
+          </div>
+          <div className="drive-actions">
             <button
               type="button"
-              className="drive-error-retry"
-              onClick={() => {
-                setError(null);
-                fetchItems();
-              }}
-            >
-              Retry
-            </button>
-            <button
-              type="button"
-              className="drive-error-dismiss"
-              onClick={() => setError(null)}
-              aria-label="Dismiss"
+              className="btn-primary"
+              onClick={openNewNoteModal}
+              disabled={loading}
             >
               <svg
                 width="18"
@@ -269,14 +217,67 @@ export default function DriveView() {
                 strokeWidth="2"
                 viewBox="0 0 24 24"
               >
-                <path d="M18 6L6 18M6 6l12 12" />
+                <path d="M12 4v16m8-8H4" />
               </svg>
+              New Note
+            </button>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={openImportModal}
+              disabled={loading}
+            >
+              <svg
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2 2v-4M17 8l-5-5-5 5M12 3v12" />
+              </svg>
+              Import
             </button>
           </div>
         </div>
-      )}
 
-      <div id="drive-container" className="drive-grid">
+        {error && (
+          <div className="drive-error-banner" role="alert">
+            <p className="drive-error-message">{error}</p>
+            <div className="drive-error-actions">
+              <button
+                type="button"
+                className="drive-error-retry"
+                onClick={() => {
+                  setError(null);
+                  fetchItems();
+                }}
+              >
+                Retry
+              </button>
+              <button
+                type="button"
+                className="drive-error-dismiss"
+                onClick={() => setError(null)}
+                aria-label="Dismiss"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div id="drive-container" className="drive-grid">
         {loading ? (
           <div className="empty-state">
             <p style={{ color: "var(--text-secondary)" }}>Loading…</p>
@@ -321,6 +322,7 @@ export default function DriveView() {
             </div>
           ))
         )}
+        </div>
       </div>
     </section>
   );
