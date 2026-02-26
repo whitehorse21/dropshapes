@@ -703,7 +703,7 @@ main#mainContent.app-main {
 @media (min-width: 769px) {
   main#mainContent.app-main {
     margin-left: 88px; /* dock + padding + gap so content doesn't sit under dock */
-    max-width: min(1000px, calc(100vw - 88px));
+    max-width: min(1280px, calc(100vw - 88px));
   }
 }
 
@@ -5711,11 +5711,16 @@ body.high-contrast-mode .admin-page-header h1 {
 }
 
 /* Resumes page */
+#view-resumes.view-section {
+  max-width: none;
+  padding-left: 8px;
+  padding-right: 8px;
+}
 .resumes-page-content {
   width: 100%;
-  max-width: 720px;
+  max-width: min(1400px, 100%);
   margin: 0 auto;
-  padding: 0 20px 32px;
+  padding: 0 8px 32px;
   box-sizing: border-box;
 }
 
@@ -5808,6 +5813,328 @@ body.high-contrast-mode .admin-page-header h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+/* Resume template cards (list page) */
+.resumes-template-card-thumb {
+  width: 100%;
+  aspect-ratio: 3/4;
+  margin: -24px -24px 16px -24px;
+  overflow: hidden;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--input-bg);
+}
+.resumes-template-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Resume step layout – responsive, matches current UI */
+.resume-step-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 20px 32px;
+  box-sizing: border-box;
+}
+.resume-step-aside {
+  flex-shrink: 0;
+  width: 200px;
+}
+.resume-step-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.resume-step-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.resume-step-nav-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+.resume-step-nav-btn:hover {
+  border-color: var(--accent);
+  background: var(--card-hover);
+}
+.resume-step-nav-btn.is-active {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--accent);
+  font-weight: 600;
+}
+.resume-step-nav-btn.is-done {
+  color: var(--text-secondary);
+}
+.resume-step-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--glass-border);
+}
+.resume-step-content {
+  width: 100%;
+  max-width: 100%;
+}
+.resume-step-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 6px 0;
+}
+.resume-step-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin: 0 0 20px 0;
+}
+.resume-step-section-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 24px 0 12px 0;
+}
+.resume-step-card {
+  background: var(--card-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+.resume-step-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.resume-step-field {
+  margin-bottom: 12px;
+}
+.resume-step-field:last-child {
+  margin-bottom: 0;
+}
+.resume-step-inline-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.resume-step-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.resume-step-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
+  font-size: 0.9rem;
+}
+.resume-pill-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+.form-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.resume-preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.resume-preview-modal {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-width: 100%;
+  max-height: 90vh;
+  overflow: auto;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+.resume-preview-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* New resume – template selection (from templates/index) */
+.resumes-new-content {
+  max-width: 900px;
+}
+.resume-template-search {
+  margin-bottom: 24px;
+}
+.resume-template-search .auth-input {
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+@media (min-width: 480px) {
+  .resume-template-search .auth-input {
+    max-width: 400px;
+  }
+}
+.resumes-new-templates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.resumes-template-option {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+  padding: 0;
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  background: var(--card-bg);
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  overflow: hidden;
+}
+.resumes-template-option:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+.resumes-template-option-thumb {
+  width: 100%;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  background: var(--input-bg);
+}
+.resumes-template-option-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.resumes-template-option-body {
+  padding: 20px;
+  flex: 1;
+}
+.resumes-template-option-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 8px;
+}
+.resumes-template-option-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0 0 8px 0;
+}
+.resumes-template-option-meta {
+  font-size: 0.85rem;
+  color: var(--accent);
+}
+.resumes-template-option-cta {
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  color: var(--accent);
+  font-weight: 500;
+  border-top: 1px solid var(--glass-border);
+}
+.resumes-template-no-match {
+  color: var(--text-secondary);
+  margin: 0 0 24px 0;
+}
+.resumes-new-back {
+  margin-top: 24px;
+}
+
+/* Responsive: resume steps – stack on small screens */
+@media (max-width: 768px) {
+  .resume-step-layout {
+    flex-direction: column;
+    padding: 16px 16px 24px;
+  }
+  .resume-step-aside {
+    width: 100%;
+  }
+  .resume-step-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .resume-step-nav-btn {
+    width: auto;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .resume-step-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .resume-step-footer > div {
+    justify-content: center;
+  }
+  .resume-step-card {
+    padding: 16px;
+  }
+  .resume-pill-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 480px) {
+  .resume-pill-grid {
+    grid-template-columns: 1fr;
+  }
+  .resumes-templates-grid {
+    grid-template-columns: 1fr;
+  }
+  .resumes-new-templates-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Cover letters page */

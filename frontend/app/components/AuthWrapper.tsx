@@ -16,7 +16,12 @@ export default function AuthWrapper({
 
   if (isLoading) {
     return (
-      <div className="app-loading-screen" role="status" aria-live="polite" aria-label="Loading">
+      <div
+        className="app-loading-screen"
+        role="status"
+        aria-live="polite"
+        aria-label="Loading"
+      >
         <div className="app-loading-backdrop" aria-hidden="true" />
         <div className="app-loading-card">
           <div className="app-loading-logo">
@@ -59,7 +64,7 @@ export default function AuthWrapper({
         id="mainContent"
         className="app-main"
         tabIndex={-1}
-        style={{ width: "100%", maxWidth: "1000px" }}
+        style={{ width: "100%", maxWidth: "1200px" }}
       >
         {children}
       </main>

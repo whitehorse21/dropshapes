@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthWrapper from '@/app/components/AuthWrapper';
 import { clearResumeData, updateResumeData, defaultResumeData } from '@/app/utils/resumeService';
-import { resumeTemplates } from '../resumeSteps';
+import { resumeTemplates, type ResumeTemplateOption } from '../templateList';
 
 function NewResumeContent() {
   const router = useRouter();
@@ -13,10 +13,11 @@ function NewResumeContent() {
   const filtered = resumeTemplates.filter(
     (t) =>
       t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.description.toLowerCase().includes(searchTerm.toLowerCase())
+      t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSelectTemplate = (template: (typeof resumeTemplates)[0]) => {
+  const handleSelectTemplate = (template: ResumeTemplateOption) => {
     clearResumeData();
     updateResumeData({
       ...defaultResumeData,
@@ -28,44 +29,45 @@ function NewResumeContent() {
 
   return (
     <section className="view-section active-view" aria-label="New Resume">
-      <div className="home-content-wrapper" style={{ maxWidth: '900px', margin: '0 auto' }}>
+      <div className="resumes-page-content resumes-new-content">
         <div className="header-minimal">
           <h1>Choose Your Template</h1>
           <p>Select a template to start building your resume.</p>
         </div>
-        <div style={{ marginBottom: '24px' }}>
+        <div className="resume-template-search">
           <input
             type="text"
             placeholder="Search templates..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="auth-input"
-            style={{ maxWidth: '400px' }}
+            aria-label="Search templates"
           />
         </div>
-        <div className="grid-minimal" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}>
+        <div className="resumes-templates-grid resumes-new-templates-grid">
           {filtered.map((template) => (
             <button
               key={template.id}
               type="button"
-              className="tool-pill"
-              style={{
-                display: 'block',
-                textAlign: 'left',
-                padding: '24px',
-                cursor: 'pointer',
-                border: '2px solid var(--border)',
-              }}
+              className="resumes-template-option"
               onClick={() => handleSelectTemplate(template)}
             >
-              <span style={{ fontSize: '1.1rem', fontWeight: 600 }}>{template.name}</span>
-              <p style={{ marginTop: '8px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{template.description}</p>
-              <span style={{ marginTop: '12px', display: 'inline-block', fontSize: '0.85rem', color: 'var(--accent)' }}>Select →</span>
+              {template.thumbnail ? (
+                <div className="resumes-template-option-thumb">
+                  <img src={template.thumbnail} alt="" />
+                </div>
+              ) : null}
+              <div className="resumes-template-option-body">
+                <span className="resumes-template-option-name">{template.name}</span>
+                <p className="resumes-template-option-desc">{template.description}</p>
+                <span className="resumes-template-option-meta">{template.category}</span>
+              </div>
+              <span className="resumes-template-option-cta">Select →</span>
             </button>
           ))}
         </div>
-        {filtered.length === 0 && <p style={{ color: 'var(--text-secondary)' }}>No templates match your search.</p>}
-        <div style={{ marginTop: '24px' }}>
+        {filtered.length === 0 && <p className="resumes-template-no-match">No templates match your search.</p>}
+        <div className="resumes-new-back">
           <button type="button" className="btn-resume" onClick={() => router.push('/resumes')}>
             Back to Resumes
           </button>

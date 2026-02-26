@@ -8,8 +8,3 @@ export const resumeSteps = [
 ] as const;
 
 export type ResumeStepName = (typeof resumeSteps)[number]['name'];
-
-export const resumeTemplates = [
-  { id: 'classic', name: 'Classic', category: 'Classic', description: 'Clean and professional' },
-  { id: 'modern', name: 'Modern', category: 'Modern', description: 'Contemporary layout' },
-];
