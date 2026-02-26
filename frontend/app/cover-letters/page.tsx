@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import AuthWrapper from '@/app/components/AuthWrapper';
 import axiosInstance from '@/app/apimodule/axiosConfig/Axios';
 import ApiEndpoints from '@/app/apimodule/endpoints/ApiEndpoints';
 import { toast } from 'react-hot-toast';
@@ -110,8 +109,6 @@ function CoverLettersContent() {
 
 export default function CoverLettersPage() {
   return (
-    <AuthWrapper>
-      <CoverLettersContent />
-    </AuthWrapper>
+    <CoverLettersContent />
   );
 }

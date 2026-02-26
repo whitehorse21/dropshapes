@@ -277,10 +277,12 @@ export default function ResumeStepLayout({
   return (
     <div className="view-section active-view resume-step-layout">
       <aside className="resume-step-aside">
+        <div className="resume-step-progress" aria-live="polite">
+          Step {currentIndex + 1} of {resumeSteps.length}
+        </div>
         <button
           type="button"
-          className="btn-resume"
-          style={{ marginBottom: "20px" }}
+          className="btn-resume resume-step-back"
           onClick={handlePrev}
         >
           ← Back
@@ -299,15 +301,17 @@ export default function ResumeStepLayout({
                     `/resumes/new/${s.name}${id ? `?redirect=final&id=${id}` : ""}`,
                   )
                 }
+                aria-current={isActive ? "step" : undefined}
               >
-                {i + 1}. {s.label}
+                <span className="resume-step-nav-num">{i + 1}</span>
+                <span className="resume-step-nav-label">{s.label}</span>
               </button>
             );
           })}
         </nav>
       </aside>
       <main className="resume-step-main">
-        {children}
+        <div className="resume-step-body">{children}</div>
         <div className="resume-step-footer">
           {!isFirstStep ? (
             <button type="button" className="btn-resume" onClick={handlePrev}>
@@ -316,14 +320,7 @@ export default function ResumeStepLayout({
           ) : (
             <span />
           )}
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "8px",
-              alignItems: "center",
-            }}
-          >
+          <div className="resume-step-footer-actions">
             <button
               type="button"
               className="btn-resume"
@@ -361,19 +358,21 @@ export default function ResumeStepLayout({
           aria-label="Resume preview"
           onClick={() => setShowPreview(false)}
         >
-          <button
-            type="button"
-            className="resume-preview-close"
-            onClick={() => setShowPreview(false)}
-            aria-label="Close preview"
-          >
-            ×
-          </button>
           <div
             className="resume-preview-modal"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 style={{ marginBottom: "16px" }}>Preview</h3>
+            <div className="resume-preview-header">
+              <h3>Preview</h3>
+              <button
+                type="button"
+                className="resume-preview-close"
+                onClick={() => setShowPreview(false)}
+                aria-label="Close preview"
+              >
+                ×
+              </button>
+            </div>
             <ResumeBodyContent
               resumeData={((): ResumeData => {
                 const stored = getResumeFromLocalDB();

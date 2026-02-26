@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import AuthWrapper from '@/app/components/AuthWrapper';
 import { useAuth } from '@/app/context/AuthContext';
 import axiosInstance from '@/app/apimodule/axiosConfig/Axios';
 import ApiEndpoints from '@/app/apimodule/endpoints/ApiEndpoints';
@@ -183,9 +182,5 @@ function PerformanceContent() {
 }
 
 export default function PerformancePage() {
-  return (
-    <AuthWrapper>
-      <PerformanceContent />
-    </AuthWrapper>
-  );
+  return <PerformanceContent />;
 }

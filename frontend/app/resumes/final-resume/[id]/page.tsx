@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import AuthWrapper from '@/app/components/AuthWrapper';
 import axiosInstance from '@/app/apimodule/axiosConfig/Axios';
 import endpoints from '@/app/apimodule/endpoints/ApiEndpoints';
 import {
@@ -87,10 +86,16 @@ function FinalResumeContent() {
 
   if (loading || !resumeData) {
     return (
-      <section className="view-section active-view" aria-label="Loading resume">
-        <div className="resume-preview-loading">
-          <div className="resume-preview-loading-spinner" aria-hidden="true" />
-          <p className="resume-preview-loading-text">Loading resume...</p>
+      <section
+        id="view-final-resume"
+        className="view-section active-view"
+        aria-label="Loading resume"
+      >
+        <div className="resumes-page-content">
+          <div className="resume-preview-loading">
+            <div className="resume-preview-loading-spinner" aria-hidden="true" />
+            <p className="resume-preview-loading-text">Loading resume...</p>
+          </div>
         </div>
       </section>
     );
@@ -101,69 +106,74 @@ function FinalResumeContent() {
   const displayTitle = resumeData.resume_title || name;
 
   return (
-    <section className="view-section active-view" aria-label="Resume">
-      <div className="resume-preview-page">
-        <header className="resume-no-print resume-preview-header">
-          <div className="resume-preview-title-wrap">
-            {editingTitle ? (
-              <input
-                type="text"
-                className="auth-input resume-preview-title-input"
-                value={resumeData.resume_title}
-                onChange={(e) => handleTitleChange(e.target.value)}
-                onBlur={() => setEditingTitle(false)}
-                onKeyDown={(e) => e.key === 'Enter' && setEditingTitle(false)}
-                autoFocus
-                aria-label="Resume title"
-              />
-            ) : (
-              <h1
-                className="resume-preview-title resume-preview-title-editable"
-                onClick={() => setEditingTitle(true)}
-                title="Click to edit title"
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && setEditingTitle(true)}
-              >
-                {displayTitle}
-              </h1>
-            )}
-          </div>
-          <div className="resume-preview-toolbar">
-            <div className="resume-preview-toolbar-left">
-              <button
-                type="button"
-                className="btn-resume"
-                onClick={() => router.push('/resumes')}
-                aria-label="Back to resumes list"
-              >
-                ← Back to list
-              </button>
-            </div>
-            <div className="resume-preview-toolbar-right">
-              <button type="button" className="btn-resume" onClick={handleEdit} aria-label="Edit resume in builder">
-                Edit
-              </button>
-              <button
-                type="button"
-                className="btn-resume"
-                onClick={handlePrint}
-                aria-label="Print or save as PDF"
-              >
-                Print / Save as PDF
-              </button>
-              <button
-                type="button"
-                className="btn-resume btn-resume-primary"
-                onClick={handleSaveDraft}
-                disabled={saving}
-                aria-label={saving ? 'Saving' : 'Save draft'}
-              >
-                {saving ? 'Saving...' : 'Save draft'}
-              </button>
-            </div>
-          </div>
+    <section
+      id="view-final-resume"
+      className="view-section active-view"
+      aria-label="Resume"
+    >
+      <div className="resumes-page-content">
+        <header className="resume-no-print header-minimal">
+          {editingTitle ? (
+            <input
+              type="text"
+              className="resume-preview-title-input"
+              value={resumeData.resume_title}
+              onChange={(e) => handleTitleChange(e.target.value)}
+              onBlur={() => setEditingTitle(false)}
+              onKeyDown={(e) => e.key === 'Enter' && setEditingTitle(false)}
+              autoFocus
+              aria-label="Resume title"
+            />
+          ) : (
+            <h1
+              className="resume-preview-title-editable"
+              onClick={() => setEditingTitle(true)}
+              title="Click to edit title"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && setEditingTitle(true)}
+            >
+              {displayTitle}
+            </h1>
+          )}
+          <p>View, edit, and export your resume</p>
         </header>
+
+        <div className="resume-preview-toolbar resume-no-print">
+          <button
+            type="button"
+            className="btn-resume"
+            onClick={() => router.push('/resumes')}
+            aria-label="Back to resumes list"
+          >
+            ← Back to list
+          </button>
+          <button
+            type="button"
+            className="btn-resume"
+            onClick={handleEdit}
+            aria-label="Edit resume in builder"
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            className="btn-resume"
+            onClick={handlePrint}
+            aria-label="Print or save as PDF"
+          >
+            Print / Save as PDF
+          </button>
+          <button
+            type="button"
+            className="btn-resume btn-resume-primary"
+            onClick={handleSaveDraft}
+            disabled={saving}
+            aria-label={saving ? 'Saving' : 'Save draft'}
+          >
+            {saving ? 'Saving...' : 'Save draft'}
+          </button>
+        </div>
 
         <div className="resume-preview-body" ref={printRef}>
           <ResumeBodyContent resumeData={resumeData} />
@@ -174,9 +184,5 @@ function FinalResumeContent() {
 }
 
 export default function FinalResumePage() {
-  return (
-    <AuthWrapper>
-      <FinalResumeContent />
-    </AuthWrapper>
-  );
+  return <FinalResumeContent />;
 }

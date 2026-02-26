@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import AuthWrapper from '@/app/components/AuthWrapper';
 import { clearResumeData, updateResumeData, defaultResumeData } from '@/app/utils/resumeService';
 import { resumeTemplates, type ResumeTemplateOption } from '../templateList';
 
@@ -33,6 +32,11 @@ function NewResumeContent() {
         <div className="header-minimal">
           <h1>Choose Your Template</h1>
           <p>Select a template to start building your resume.</p>
+        </div>
+        <div className="resumes-new-back">
+          <button type="button" className="btn-resume" onClick={() => router.push('/resumes')}>
+            Back to Resumes
+          </button>
         </div>
         <div className="resume-template-search">
           <input
@@ -67,20 +71,11 @@ function NewResumeContent() {
           ))}
         </div>
         {filtered.length === 0 && <p className="resumes-template-no-match">No templates match your search.</p>}
-        <div className="resumes-new-back">
-          <button type="button" className="btn-resume" onClick={() => router.push('/resumes')}>
-            Back to Resumes
-          </button>
-        </div>
       </div>
     </section>
   );
 }
 
 export default function NewResumePage() {
-  return (
-    <AuthWrapper>
-      <NewResumeContent />
-    </AuthWrapper>
-  );
+  return <NewResumeContent />;
 }

@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import AuthWrapper from '@/app/components/AuthWrapper';
 import { useAuth } from '@/app/context/AuthContext';
 import axiosInstance from '@/app/apimodule/axiosConfig/Axios';
 
@@ -287,8 +286,6 @@ function InterviewTrainingContent() {
 
 export default function InterviewTrainingPage() {
   return (
-    <AuthWrapper>
-      <InterviewTrainingContent />
-    </AuthWrapper>
+    <InterviewTrainingContent />
   );
 }

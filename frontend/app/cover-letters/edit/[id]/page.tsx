@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import AuthWrapper from '@/app/components/AuthWrapper';
 import axiosInstance from '@/app/apimodule/axiosConfig/Axios';
 import ApiEndpoints from '@/app/apimodule/endpoints/ApiEndpoints';
 import { toast } from 'react-hot-toast';
@@ -79,8 +78,6 @@ function EditContent() {
 
 export default function EditCoverLetterPage() {
   return (
-    <AuthWrapper>
-      <EditContent />
-    </AuthWrapper>
+    <EditContent />
   );
 }

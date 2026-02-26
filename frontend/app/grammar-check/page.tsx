@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import AuthWrapper from '@/app/components/AuthWrapper';
 import axiosInstance from '@/app/apimodule/axiosConfig/Axios';
 
 interface Correction {
@@ -204,9 +203,5 @@ function GrammarCheckContent() {
 }
 
 export default function GrammarCheckPage() {
-  return (
-    <AuthWrapper>
-      <GrammarCheckContent />
-    </AuthWrapper>
-  );
+  return <GrammarCheckContent />;
 }

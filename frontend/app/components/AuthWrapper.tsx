@@ -64,7 +64,7 @@ export default function AuthWrapper({
         id="mainContent"
         className="app-main"
         tabIndex={-1}
-        style={{ width: "100%", maxWidth: "1200px" }}
+        style={{ width: "100%", maxWidth: "100%" }}
       >
         {children}
       </main>

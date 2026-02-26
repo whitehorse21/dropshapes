@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 import { Providers } from "./components/Providers";
+import AuthWrapper from "./components/AuthWrapper";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -45,7 +46,7 @@ export default function RootLayout({
           <Link href="/" className="logo-link" prefetch={false}>
             <img src="/logo.png" alt="Dropshapes Logo" className="app-logo" />
           </Link>
-          {children}
+          <AuthWrapper>{children}</AuthWrapper>
         </Providers>
       </body>
     </html>

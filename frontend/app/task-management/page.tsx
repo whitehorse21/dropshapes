@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import AuthWrapper from '@/app/components/AuthWrapper';
 import axiosInstance from '@/app/apimodule/axiosConfig/Axios';
 import { toast } from 'react-hot-toast';
 import AddTaskModal, { TaskData } from '@/app/components/modals/AddTaskModal';
@@ -424,9 +423,5 @@ function TaskManagementContent() {
 }
 
 export default function TaskManagementPage() {
-  return (
-    <AuthWrapper>
-      <TaskManagementContent />
-    </AuthWrapper>
-  );
+  return <TaskManagementContent />;
 }

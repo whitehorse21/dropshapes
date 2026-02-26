@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import AuthWrapper from '@/app/components/AuthWrapper';
 import axiosInstance from '@/app/apimodule/axiosConfig/Axios';
 import endpoints from '@/app/apimodule/endpoints/ApiEndpoints';
 import { apiResumeToFormData, type ResumeData } from '@/app/utils/resumeService';
@@ -91,9 +90,5 @@ function PreviewContent() {
 }
 
 export default function PreviewPage() {
-  return (
-    <AuthWrapper>
-      <PreviewContent />
-    </AuthWrapper>
-  );
+  return <PreviewContent />;
 }

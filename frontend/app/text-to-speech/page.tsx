@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import AuthWrapper from '@/app/components/AuthWrapper';
 import axiosInstance from '@/app/apimodule/axiosConfig/Axios';
 import { toast } from 'react-hot-toast';
 
@@ -223,8 +222,6 @@ function TextToSpeechContent() {
 
 export default function TextToSpeechPage() {
   return (
-    <AuthWrapper>
-      <TextToSpeechContent />
-    </AuthWrapper>
+    <TextToSpeechContent />
   );
 }

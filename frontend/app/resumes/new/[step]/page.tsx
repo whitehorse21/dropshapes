@@ -59,8 +59,10 @@ export default function ResumeStepPage() {
   if (step === 'profession') {
     return (
       <div className="resume-step-content">
-        <h2 className="resume-step-title">Choose your profession</h2>
-        <p className="resume-step-subtitle">This helps tailor your resume content and suggestions.</p>
+        <div className="resume-step-header">
+          <h2 className="resume-step-title">Choose your profession</h2>
+          <p className="resume-step-subtitle">This helps tailor your resume content and suggestions.</p>
+        </div>
         <div className="resume-pill-grid">
           {PROFESSIONS.map((p) => (
             <button
@@ -104,8 +106,10 @@ export default function ResumeStepPage() {
     const personalFields = ['firstName', 'lastName', 'email', 'phone', 'location', 'address', 'linkedin', 'website'] as const;
     return (
       <div className="resume-step-content">
-        <h2 className="resume-step-title">Personal information</h2>
-        <p className="resume-step-subtitle">Required fields: first name, last name, and email.</p>
+        <div className="resume-step-header">
+          <h2 className="resume-step-title">Personal information</h2>
+          <p className="resume-step-subtitle">Required fields: first name, last name, and email.</p>
+        </div>
         <div className="resume-step-card">
           <div style={{ display: 'grid', gap: '1rem' }}>
             {personalFields.map((field) => (
@@ -148,8 +152,10 @@ export default function ResumeStepPage() {
     const removeExp = (index: number) => sync({ experience: exp.filter((_, i) => i !== index) });
     return (
       <div className="resume-step-content">
-        <h2 className="resume-step-title">Work experience</h2>
-        <p className="resume-step-subtitle">Add at least one role. Company, role, and start date are required.</p>
+        <div className="resume-step-header">
+          <h2 className="resume-step-title">Work experience</h2>
+          <p className="resume-step-subtitle">Add at least one role. Company, role, and start date are required.</p>
+        </div>
         {exp.map((e, i) => (
           <div key={i} className="resume-step-card">
             <div className="resume-step-card-header">
@@ -201,8 +207,10 @@ export default function ResumeStepPage() {
     const removeEdu = (index: number) => sync({ education: edu.filter((_, i) => i !== index) });
     return (
       <div className="resume-step-content">
-        <h2 className="resume-step-title">Education</h2>
-        <p className="resume-step-subtitle">Add at least one entry. Institution, degree, and start date are required.</p>
+        <div className="resume-step-header">
+          <h2 className="resume-step-title">Education</h2>
+          <p className="resume-step-subtitle">Add at least one entry. Institution, degree, and start date are required.</p>
+        </div>
         {edu.map((e, i) => (
           <div key={i} className="resume-step-card">
             <div className="resume-step-card-header">
@@ -275,9 +283,10 @@ export default function ResumeStepPage() {
     const [newHobby, setNewHobby] = useState('');
     return (
       <div className="resume-step-content">
-        <h2 className="resume-step-title">Skills, languages & more</h2>
-        <p className="resume-step-subtitle">Optional. Add skills, languages, hobbies, and certifications.</p>
-
+        <div className="resume-step-header">
+          <h2 className="resume-step-title">Skills, languages & more</h2>
+          <p className="resume-step-subtitle">Optional. Add skills, languages, hobbies, and certifications.</p>
+        </div>
         <h3 className="resume-step-section-title">Skills</h3>
         {skills.map((s, i) => (
           <div key={i} className="resume-step-card" style={{ padding: '1rem' }}>
@@ -361,8 +370,10 @@ export default function ResumeStepPage() {
     };
     return (
       <div className="resume-step-content">
-        <h2 className="resume-step-title">Custom sections</h2>
-        <p className="resume-step-subtitle">Add optional sections (e.g. Projects, Publications, Volunteering).</p>
+        <div className="resume-step-header">
+          <h2 className="resume-step-title">Custom sections</h2>
+          <p className="resume-step-subtitle">Add optional sections (e.g. Projects, Publications, Volunteering).</p>
+        </div>
         {custom.map((sec, si) => (
           <div key={si} className="resume-step-card">
             <div className="resume-step-field">
