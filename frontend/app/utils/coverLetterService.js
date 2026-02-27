@@ -139,3 +139,72 @@ export const initializeCoverLetterData = () => {
     $coverLetterStyle.next(storedStyle);
   }
 };
+
+// Defaults and buildCoverLetterPayload (for cover letter create/update API)
+const defaultProfile = {
+  full_name: '',
+  email: '',
+  phone_number: '',
+  location: '',
+  linkedin_profile: '',
+  portfolio_website: '',
+};
+const defaultRecipient = {
+  company_name: '',
+  hiring_manager_name: '',
+  job_title: '',
+  company_address: '',
+};
+const defaultIntroduction = { greet_text: 'Dear Hiring Manager,', intro_para: '' };
+const defaultClosing = { text: 'Sincerely,' };
+const defaultCoverStyle = { font: 'Arial', color: '#000000' };
+
+export const defaultCoverLetterData = {
+  cover_letter_title: '',
+  cover_letter_type: 'professional',
+  cover_template_category: 'professional',
+  profile: { ...defaultProfile },
+  recipient: { ...defaultRecipient },
+  introduction: { ...defaultIntroduction },
+  body: '',
+  closing: { ...defaultClosing },
+  cover_style: { ...defaultCoverStyle },
+};
+
+/** Ensure object has only string values for API (Pydantic expects no null/undefined). */
+function toPlainStrings(defaults, source) {
+  const out = {};
+  for (const key of Object.keys(defaults)) {
+    const v = source != null && source[key] != null ? source[key] : defaults[key];
+    out[key] = typeof v === 'string' ? v : '';
+  }
+  return out;
+}
+
+/** Build payload for POST create (and PUT update). All nested fields are plain strings for backend. */
+export function buildCoverLetterPayload(data) {
+  if (!data || typeof data !== 'object') {
+    return {
+      cover_letter_title: 'New Cover Letter',
+      cover_letter_type: 'professional',
+      cover_template_category: 'professional',
+      profile: toPlainStrings(defaultProfile, null),
+      recipient: toPlainStrings(defaultRecipient, null),
+      introduction: toPlainStrings(defaultIntroduction, null),
+      body: '',
+      closing: toPlainStrings(defaultClosing, null),
+      cover_style: toPlainStrings(defaultCoverStyle, null),
+    };
+  }
+  return {
+    cover_letter_title: (data.cover_letter_title != null ? String(data.cover_letter_title).trim() : '') || 'New Cover Letter',
+    cover_letter_type: (data.cover_letter_type != null ? String(data.cover_letter_type).trim() : '') || 'professional',
+    cover_template_category: (data.cover_template_category != null ? String(data.cover_template_category).trim() : '') || 'professional',
+    profile: toPlainStrings(defaultProfile, data.profile),
+    recipient: toPlainStrings(defaultRecipient, data.recipient),
+    introduction: toPlainStrings(defaultIntroduction, data.introduction),
+    body: data.body != null ? String(data.body) : '',
+    closing: toPlainStrings(defaultClosing, data.closing),
+    cover_style: toPlainStrings(defaultCoverStyle, data.cover_style),
+  };
+}

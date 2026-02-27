@@ -403,6 +403,31 @@ export default function HomeView() {
             <button
               type="button"
               className="tool-pill"
+              onClick={() => router.push("/education")}
+              aria-label="Education"
+            >
+              <span className="tool-pill-icon" aria-hidden>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+                  <path d="M8 7h8" />
+                  <path d="M8 11h8" />
+                </svg>
+              </span>
+              Education
+            </button>
+            <button
+              type="button"
+              className="tool-pill"
               onClick={() => router.push("/tools/games")}
               aria-label="Games"
             >

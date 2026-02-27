@@ -26,11 +26,12 @@ const endpoints = {
   contactUs: formatEndpoint("contact"),
   logout: "auth/logout", // Remove trailing slash for auth endpoints
   courseUnits: formatEndpoint('course-units'),  
-  assignments: formatEndpoint('assignments'),  
+  assignments: formatEndpoint('assignments'),
   discussions: formatEndpoint('discussions'),
-  // Use our custom API endpoint for individual discussions to avoid 404 errors
-  discussion: id => `/api/discussions/${id}`,
-  resources: formatEndpoint('resources'),  
+  discussion: (id) => `discussions/${id}`,
+  resources: formatEndpoint('resources'),
+  comments: formatEndpoint('comments'),
+  commentsByDiscussion: (discussionId) => `comments/discussion/${discussionId}`,  
   
   // Subscription endpoints - these match the backend API routes
   subscriptions: formatSubscriptionEndpoint('subscriptions/plans'), // Get available plans

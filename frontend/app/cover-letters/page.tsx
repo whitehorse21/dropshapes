@@ -6,15 +6,29 @@ import Link from 'next/link';
 import axiosInstance from '@/app/apimodule/axiosConfig/Axios';
 import ApiEndpoints from '@/app/apimodule/endpoints/ApiEndpoints';
 import { toast } from 'react-hot-toast';
+import CoverLetterCard from '@/app/cover-letters/components/CoverLetterCard';
+import {
+  buildCoverLetterPayload,
+  defaultCoverLetterData,
+  type CoverLetterData,
+} from '@/app/utils/coverLetterService';
+import { Plus } from 'lucide-react';
 
 interface CoverLetter {
   id: number;
-  cover_letter_title: string;
+  cover_letter_title?: string;
   cover_letter_type?: string;
   cover_template_category?: string;
-  recipient?: { company_name?: string; job_title?: string; hiring_manager_name?: string };
+  status?: string;
+  recipient?: {
+    company_name?: string;
+    job_title?: string;
+    hiring_manager_name?: string;
+  };
+  introduction?: { greet_text?: string; intro_para?: string };
   created_at?: string;
   updated_at?: string;
+  [key: string]: unknown;
 }
 
 function CoverLettersContent() {
@@ -26,7 +40,7 @@ function CoverLettersContent() {
     setLoading(true);
     try {
       const res = await axiosInstance.get<{ success: boolean; data: CoverLetter[] }>(ApiEndpoints.coverLetters);
-      setList(res.data.data || []);
+      setList(res.data?.data ?? []);
     } catch (err) {
       toast.error('Failed to load cover letters');
       setList([]);
@@ -39,10 +53,18 @@ function CoverLettersContent() {
     load();
   }, []);
 
+  const handleView = (id: number) => {
+    router.push(`/cover-letters/preview/${id}`);
+  };
+
+  const handleEdit = (id: number) => {
+    router.push(`/cover-letters/edit/${id}`);
+  };
+
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this cover letter?')) return;
     try {
-      await axiosInstance.delete(`${ApiEndpoints.coverLetters.replace(/\/$/, '')}/${id}`);
+      await axiosInstance.delete(`${ApiEndpoints.coverLetters.replace(/\/$/, '')}/${id}/`);
       toast.success('Deleted');
       load();
     } catch {
@@ -50,65 +72,103 @@ function CoverLettersContent() {
     }
   };
 
-  const formatDate = (s?: string) => (s ? new Date(s).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—');
+  const handleDuplicate = async (id: number) => {
+    try {
+      const baseUrl = ApiEndpoints.coverLetters.replace(/\/$/, '');
+      const res = await axiosInstance.get<{ success: boolean; data: Record<string, unknown> }>(`${baseUrl}/${id}/`);
+      const letter = res.data?.data;
+      if (!letter || typeof letter !== 'object') {
+        toast.error('Could not load cover letter to duplicate');
+        return;
+      }
+      const normalized: CoverLetterData = {
+        ...defaultCoverLetterData,
+        ...letter,
+        profile: { ...defaultCoverLetterData.profile, ...(letter.profile as object) },
+        recipient: { ...defaultCoverLetterData.recipient, ...(letter.recipient as object) },
+        introduction: { ...defaultCoverLetterData.introduction, ...(letter.introduction as object) },
+        closing: { ...defaultCoverLetterData.closing, ...(letter.closing as object) },
+        cover_style: { ...defaultCoverLetterData.cover_style, ...(letter.cover_style as object) },
+      } as CoverLetterData;
+      const payload = buildCoverLetterPayload(normalized);
+      const created = await axiosInstance.post(`${baseUrl}/`, payload);
+      const newId = (created.data as { data?: { id?: number }; id?: number })?.data?.id ?? (created.data as { id?: number })?.id;
+      if (newId) {
+        toast.success('Cover letter duplicated');
+        router.push(`/cover-letters/preview/${newId}`);
+      } else {
+        load();
+      }
+    } catch {
+      toast.error('Failed to duplicate');
+    }
+  };
 
   return (
-    <section id="view-cover-letters" className="view-section active-view" aria-label="Cover Letters">
+    <section
+      id="view-cover-letters"
+      className="view-section active-view"
+      aria-label="Cover Letters"
+    >
       <div className="tool-page-wrap cover-letters-page">
-        <div className="header-minimal">
+        <header className="header-minimal">
           <h1>Cover Letters</h1>
-          <p>Create and manage your cover letters.</p>
-        </div>
-        <div className="tool-page-nav">
-          <button type="button" className="btn-resume" onClick={() => router.push('/')} aria-label="Back to Home">
+          <p>Create and manage your cover letters. Choose a template and tailor each letter to the role.</p>
+        </header>
+
+        <div className="tool-page-nav tool-page-nav--cover-letters">
+          <button
+            type="button"
+            className="btn-resume"
+            onClick={() => router.push('/')}
+            aria-label="Back to Home"
+          >
             ← Back to Home
           </button>
-          <Link href="/cover-letters/new" className="btn-resume btn-resume-primary">
+          <Link
+            href="/cover-letters/new"
+            className="btn-resume btn-resume-primary"
+            aria-label="Create new cover letter"
+          >
+            <Plus aria-hidden />
             New cover letter
           </Link>
         </div>
 
-        <div className="tool-page-card">
-          {loading ? (
-            <p className="cl-loading">Loading cover letters…</p>
-          ) : list.length === 0 ? (
-            <p className="cl-empty">No cover letters yet. Create one to get started.</p>
-          ) : (
-            <ul className="cl-list">
-              {list.map((letter) => (
-                <li key={letter.id} className="cl-card">
-                  <div className="cl-card-main">
-                    <h3 className="cl-card-title">{letter.cover_letter_title || 'Untitled'}</h3>
-                    <p className="cl-card-meta">
-                      {letter.recipient?.company_name && <span>{letter.recipient.company_name}</span>}
-                      {letter.recipient?.job_title && <span> • {letter.recipient.job_title}</span>}
-                      {letter.cover_template_category && <span> • {letter.cover_template_category}</span>}
-                    </p>
-                    <p className="cl-card-date">Updated {formatDate(letter.updated_at || letter.created_at)}</p>
-                  </div>
-                  <div className="cl-card-actions">
-                    <button type="button" className="btn-resume" onClick={() => router.push(`/cover-letters/preview/${letter.id}`)}>
-                      Preview
-                    </button>
-                    <button type="button" className="btn-resume" onClick={() => router.push(`/cover-letters/edit/${letter.id}`)}>
-                      Edit
-                    </button>
-                    <button type="button" className="btn-resume btn-resume-danger" onClick={() => handleDelete(letter.id)}>
-                      Delete
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        {loading ? (
+          <div className="cover-letters-loading">
+            <div className="cover-letters-loading-spinner" aria-hidden />
+            <p>Loading cover letters…</p>
+          </div>
+        ) : list.length === 0 ? (
+          <div className="cover-letters-empty">
+            <p>No cover letters yet</p>
+            <p>Create one to get started.</p>
+            <Link href="/cover-letters/new" className="btn-resume btn-resume-primary">
+              <Plus aria-hidden />
+              Create your first cover letter
+            </Link>
+          </div>
+        ) : (
+          <ul className="cover-letters-list-grid" role="list">
+            {list.map((letter) => (
+              <li key={letter.id}>
+                <CoverLetterCard
+                  coverLetter={letter}
+                  onView={handleView}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onDuplicate={handleDuplicate}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </section>
   );
 }
 
 export default function CoverLettersPage() {
-  return (
-    <CoverLettersContent />
-  );
+  return <CoverLettersContent />;
 }

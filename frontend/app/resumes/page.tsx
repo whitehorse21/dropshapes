@@ -175,16 +175,16 @@ function ResumesPageContent() {
           >
             ← Back to Home
           </button>
-          <button
-            type="button"
-            className="btn-resume"
-            onClick={handleRefresh}
-            disabled={refreshing}
-          >
-            {refreshing ? "Refreshing..." : "Refresh"}
-          </button>
-        </div>
-        <div className="resumes-page-actions resumes-page-actions--center">
+          {/*
+            <button
+              type="button"
+              className="btn-resume"
+              onClick={handleRefresh}
+              disabled={refreshing}
+            >
+              {refreshing ? "Refreshing..." : "Refresh"}
+            </button>
+          */}
           <button
             type="button"
             className="btn-resume btn-resume-primary"
@@ -194,6 +194,18 @@ function ResumesPageContent() {
             Create New Resume
           </button>
         </div>
+        {/*
+          <div className="resumes-page-actions resumes-page-actions--center">
+            <button
+              type="button"
+              className="btn-resume btn-resume-primary"
+              onClick={() => router.push("/resumes/new")}
+              aria-label="Create new resume"
+            >
+              Create New Resume
+            </button>
+          </div>
+        */}
 
         {loading ? (
           <div
