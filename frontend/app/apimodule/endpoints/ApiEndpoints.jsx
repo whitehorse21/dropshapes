@@ -73,6 +73,7 @@ const endpoints = {
   // Chat assistant (Claude)
   chatConversations: formatEndpoint('chat/conversations'),
   chatConversation: (id) => `chat/conversations/${id}`,
+  chatConversationUpdate: (id) => formatSubscriptionEndpoint(`chat/conversations/${id}`),
   chatMessage: formatEndpoint('chat/message'),
   chatAudio: formatEndpoint('chat/audio'),
   /** Playback URL for a voice message (backend redirects to presigned S3). Use with axios baseURL. */

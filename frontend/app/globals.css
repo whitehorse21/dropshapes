@@ -1285,13 +1285,27 @@ body.high-contrast-mode .header-minimal h1 {
   animation: chatTypingBounce 1.4s ease-in-out infinite both;
 }
 
-.chat-typing-dot:nth-child(1) { animation-delay: 0s; }
-.chat-typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.chat-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+.chat-typing-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+.chat-typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.chat-typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
 
 @keyframes chatTypingBounce {
-  0%, 80%, 100% { transform: scale(0.75); opacity: 0.5; }
-  40% { transform: scale(1); opacity: 1; }
+  0%,
+  80%,
+  100% {
+    transform: scale(0.75);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* Input Area (Bottom) */
@@ -1339,8 +1353,8 @@ body.high-contrast-mode .header-minimal h1 {
 }
 
 .search-aura:focus-within {
-  border-color: var(--accent);
-  box-shadow: 0 8px 30px rgba(76, 111, 255, 0.2);
+  border-color: var(--glass-border);
+  box-shadow: none;
 }
 
 .search-aura input {
@@ -1353,6 +1367,15 @@ body.high-contrast-mode .header-minimal h1 {
   height: 100%;
   font-family: inherit;
   caret-color: var(--accent);
+}
+
+#mainInput:focus,
+#mainInput:focus-visible,
+.search-aura input:focus,
+.search-aura input:focus-visible {
+  outline: none;
+  box-shadow: none;
+  border: none;
 }
 
 .search-aura input::placeholder {
@@ -1548,8 +1571,15 @@ body.high-contrast-mode .header-minimal h1 {
 }
 
 @keyframes recordingPulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255, 76, 76, 0.35); }
-  50% { opacity: 0.9; box-shadow: 0 0 0 8px rgba(255, 76, 76, 0); }
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(255, 76, 76, 0.35);
+  }
+  50% {
+    opacity: 0.9;
+    box-shadow: 0 0 0 8px rgba(255, 76, 76, 0);
+  }
 }
 
 /* Recording bar above search when voice input is active */
@@ -1597,7 +1627,9 @@ body.high-contrast-mode .header-minimal h1 {
   border: none;
   border-radius: var(--radius);
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.2s;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
 }
 
 .recording-bar-stop:hover {
@@ -9409,7 +9441,9 @@ body.high-contrast-mode .games-dashboard .header-minimal h1 {
   background: var(--input-bg);
   color: var(--text-primary);
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
 }
 
 .games-dashboard__back:hover {
@@ -9438,7 +9472,10 @@ body.high-contrast-mode .games-dashboard .header-minimal h1 {
   background: var(--input-bg);
   color: var(--text-secondary);
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
 }
 
 .games-dashboard__filter:hover {
@@ -9512,7 +9549,10 @@ body.high-contrast-mode .games-dashboard .header-minimal h1 {
   background: var(--card-bg);
   color: var(--text-primary);
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    border-color 0.2s;
   box-sizing: border-box;
 }
 
@@ -9625,7 +9665,10 @@ body.high-contrast-mode .games-dashboard .header-minimal h1 {
   border-radius: var(--radius-lg);
   color: var(--text-primary);
   text-decoration: none;
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    border-color 0.2s;
 }
 
 .education-quick-card:hover {
@@ -9698,7 +9741,9 @@ body.high-contrast-mode .games-dashboard .header-minimal h1 {
   background: var(--card-bg);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .education-unit-card:hover {
@@ -9773,7 +9818,8 @@ body.high-contrast-mode .games-dashboard .header-minimal h1 {
   padding: 24px;
   margin-bottom: 24px;
 }
-.education-form { }
+.education-form {
+}
 .education-form-group {
   margin-bottom: 16px;
 }
@@ -9816,7 +9862,9 @@ body.high-contrast-mode .games-dashboard .header-minimal h1 {
   animation: spin 0.8s linear infinite;
 }
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .education-list {
@@ -9829,7 +9877,9 @@ body.high-contrast-mode .games-dashboard .header-minimal h1 {
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: 20px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 .education-card:hover {
   border-color: var(--accent);
@@ -9843,7 +9893,10 @@ body.high-contrast-mode .games-dashboard .header-minimal h1 {
   gap: 12px;
   margin-bottom: 12px;
 }
-.education-card__header-text { flex: 1; min-width: 0; }
+.education-card__header-text {
+  flex: 1;
+  min-width: 0;
+}
 .education-card__header-right {
   display: flex;
   align-items: center;
@@ -9887,7 +9940,9 @@ body.high-contrast-mode .games-dashboard .header-minimal h1 {
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 .education-card__action:hover {
   background: rgba(76, 111, 255, 0.1);
@@ -9968,7 +10023,9 @@ body.high-contrast-mode .games-dashboard .header-minimal h1 {
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 .education-resource-card:hover {
   border-color: var(--accent);

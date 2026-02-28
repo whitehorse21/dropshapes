@@ -18,6 +18,7 @@ from app.schemas.chat import (
     ConversationResponse,
     ConversationWithMessages,
     ConversationCreate,
+    ConversationUpdate,
 )
 from anthropic import NotFoundError as AnthropicNotFoundError
 from app.services.claude_chat_service import ClaudeChatService
@@ -105,13 +106,37 @@ def create_conversation(
     return convo
 
 
+@router.patch("/conversations/{conversation_id}", response_model=ConversationResponse)
+def update_conversation(
+    conversation_id: int,
+    body: ConversationUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """Update conversation title (e.g. rename). Only owner can update."""
+    convo = (
+        db.query(ChatConversation)
+        .filter(
+            ChatConversation.id == conversation_id,
+            ChatConversation.user_id == current_user.id,
+        )
+        .first()
+    )
+    if not convo:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    convo.title = body.title.strip()
+    db.commit()
+    db.refresh(convo)
+    return convo
+
+
 @router.delete("/conversations/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_conversation(
     conversation_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    """Delete a conversation and all its messages (clear chat)."""
+    """Delete a conversation and all its messages (clear all chats in this conversation)."""
     convo = (
         db.query(ChatConversation)
         .filter(

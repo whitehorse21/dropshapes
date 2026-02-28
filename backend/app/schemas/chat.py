@@ -47,3 +47,7 @@ class ConversationWithMessages(BaseModel):
 
 class ConversationCreate(BaseModel):
     title: str = "New Chat"
+
+
+class ConversationUpdate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=500)

@@ -15,6 +15,7 @@ export default function HomeView() {
   const { user, isAuthenticated } = useAuth();
   const {
     messages,
+    conversations,
     currentConversationId,
     loading,
     setMessages,
@@ -23,12 +24,14 @@ export default function HomeView() {
     fetchConversations,
     newChat: contextNewChat,
     deleteConversation,
+    updateConversationTitle,
   } = useChat();
   const [inputVal, setInputVal] = useState("");
   const [sending, setSending] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [isTempMode, setIsTempMode] = useState(false);
   const [clearChatModalOpen, setClearChatModalOpen] = useState(false);
+  const [saveTitleModalOpen, setSaveTitleModalOpen] = useState(false);
+  const [saveTitleValue, setSaveTitleValue] = useState("");
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [playbackUrls, setPlaybackUrls] = useState<Record<number, string>>({});
   const playbackRequestedRef = useRef<Set<number>>(new Set());
@@ -44,18 +47,25 @@ export default function HomeView() {
 
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
   // Fetch playable URL for stored voice messages (S3 presigned via backend)
   useEffect(() => {
     messages.forEach((msg) => {
-      if (msg.id != null && msg.audioUrl && !playbackRequestedRef.current.has(msg.id)) {
+      if (
+        msg.id != null &&
+        msg.audioUrl &&
+        !playbackRequestedRef.current.has(msg.id)
+      ) {
         playbackRequestedRef.current.add(msg.id);
         axiosInstance
           .get(ApiEndpoints.chatMessageAudioUrl(msg.id))
-          .then((res) => setPlaybackUrls((prev) => ({ ...prev, [msg.id!]: res.data.url })))
+          .then((res) =>
+            setPlaybackUrls((prev) => ({ ...prev, [msg.id!]: res.data.url })),
+          )
           .catch(() => {});
       }
     });
@@ -82,7 +92,10 @@ export default function HomeView() {
       return;
     }
     setInputVal("");
-    setMessages((prev) => [...prev, { text, sender: "user", timestamp: Date.now() }]);
+    setMessages((prev) => [
+      ...prev,
+      { text, sender: "user", timestamp: Date.now() },
+    ]);
     setSending(true);
     try {
       const res = await axiosInstance.post(ApiEndpoints.chatMessage, {
@@ -96,20 +109,31 @@ export default function HomeView() {
           id: data.user_message?.id,
           text: data.user_message?.content ?? text,
           sender: "user",
-          timestamp: new Date(data.user_message?.created_at || Date.now()).getTime(),
+          timestamp: new Date(
+            data.user_message?.created_at || Date.now(),
+          ).getTime(),
         },
         {
           id: data.assistant_message?.id,
           text: data.assistant_message?.content ?? "",
           sender: "ai",
-          timestamp: new Date(data.assistant_message?.created_at || Date.now()).getTime(),
-        }
+          timestamp: new Date(
+            data.assistant_message?.created_at || Date.now(),
+          ).getTime(),
+        },
       );
       fetchConversations();
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { detail?: string } }; message?: string };
-      const detail = err.response?.data?.detail || err.message || "Failed to send message.";
-      setMessages((prev) => [...prev, { text: `Error: ${detail}`, sender: "ai", timestamp: Date.now() }]);
+      const err = e as {
+        response?: { data?: { detail?: string } };
+        message?: string;
+      };
+      const detail =
+        err.response?.data?.detail || err.message || "Failed to send message.";
+      setMessages((prev) => [
+        ...prev,
+        { text: `Error: ${detail}`, sender: "ai", timestamp: Date.now() },
+      ]);
     } finally {
       setSending(false);
     }
@@ -149,15 +173,21 @@ export default function HomeView() {
         // Show user's voice message in chat immediately with playable audio
         setMessages((prev) => [
           ...prev,
-          { text: VOICE_PLACEHOLDER, sender: "user" as const, timestamp: Date.now(), audioUrl },
+          {
+            text: VOICE_PLACEHOLDER,
+            sender: "user" as const,
+            timestamp: Date.now(),
+            audioUrl,
+          },
         ]);
         setSending(true);
         setIsRecording(false);
 
         try {
-          const url = currentConversationId != null
-            ? `${ApiEndpoints.chatAudio}?conversation_id=${currentConversationId}`
-            : ApiEndpoints.chatAudio;
+          const url =
+            currentConversationId != null
+              ? `${ApiEndpoints.chatAudio}?conversation_id=${currentConversationId}`
+              : ApiEndpoints.chatAudio;
           const res = await axiosInstance.post(url, form, {
             headers: { "Content-Type": "multipart/form-data" },
             timeout: 60000, // transcription + Claude can take 30–60s
@@ -168,36 +198,51 @@ export default function HomeView() {
             id: data.user_message?.id,
             text: "Voice message",
             sender: "user" as const,
-            timestamp: new Date(data.user_message?.created_at || Date.now()).getTime(),
-            audioUrl: (data.user_message?.content && data.user_message.content.startsWith("http"))
-              ? data.user_message.content
-              : audioUrl,
+            timestamp: new Date(
+              data.user_message?.created_at || Date.now(),
+            ).getTime(),
+            audioUrl:
+              data.user_message?.content &&
+              data.user_message.content.startsWith("http")
+                ? data.user_message.content
+                : audioUrl,
           };
           const assistantMsg = {
             id: data.assistant_message?.id,
             text: data.assistant_message?.content ?? "",
             sender: "ai" as const,
-            timestamp: new Date(data.assistant_message?.created_at || Date.now()).getTime(),
+            timestamp: new Date(
+              data.assistant_message?.created_at || Date.now(),
+            ).getTime(),
           };
           // Replace optimistic placeholder with real user message (with audio) + assistant reply
           setMessages((prev) => {
             const last = prev[prev.length - 1];
-            const isPlaceholder = last?.sender === "user" && last?.text === VOICE_PLACEHOLDER;
+            const isPlaceholder =
+              last?.sender === "user" && last?.text === VOICE_PLACEHOLDER;
             const rest = isPlaceholder ? prev.slice(0, -1) : prev;
             return [...rest, userMsg, assistantMsg];
           });
           if (userMsg.audioUrl !== audioUrl) URL.revokeObjectURL(audioUrl);
           fetchConversations();
         } catch (err: unknown) {
-          const e = err as { response?: { data?: { detail?: string } }; message?: string };
+          const e = err as {
+            response?: { data?: { detail?: string } };
+            message?: string;
+          };
           URL.revokeObjectURL(audioUrl); // release blob URL on error
           setMessages((prev) => {
             const last = prev[prev.length - 1];
-            const isPlaceholder = last?.sender === "user" && last?.text === VOICE_PLACEHOLDER;
+            const isPlaceholder =
+              last?.sender === "user" && last?.text === VOICE_PLACEHOLDER;
             const rest = isPlaceholder ? prev.slice(0, -1) : prev;
             return [
               ...rest,
-              { text: `Voice error: ${e.response?.data?.detail || e.message || "Unknown"}`, sender: "ai" as const, timestamp: Date.now() },
+              {
+                text: `Voice error: ${e.response?.data?.detail || e.message || "Unknown"}`,
+                sender: "ai" as const,
+                timestamp: Date.now(),
+              },
             ];
           });
         } finally {
@@ -211,10 +256,21 @@ export default function HomeView() {
       console.error("Microphone access failed:", e);
       setIsRecording(false);
     }
-  }, [isAuthenticated, currentConversationId, router, appendMessages, setMessages, setConversationIdAfterSend, fetchConversations]);
+  }, [
+    isAuthenticated,
+    currentConversationId,
+    router,
+    appendMessages,
+    setMessages,
+    setConversationIdAfterSend,
+    fetchConversations,
+  ]);
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== "inactive"
+    ) {
       mediaRecorderRef.current.stop();
     }
   };
@@ -232,6 +288,22 @@ export default function HomeView() {
 
   const handleNewChat = () => {
     contextNewChat();
+  };
+
+  const openSaveTitleModal = () => {
+    const current = conversations.find((c) => c.id === currentConversationId);
+    setSaveTitleValue(current?.title ?? "New Chat");
+    setSaveTitleModalOpen(true);
+  };
+
+  const confirmSaveTitle = async () => {
+    if (currentConversationId != null && saveTitleValue.trim()) {
+      await updateConversationTitle(
+        currentConversationId,
+        saveTitleValue.trim(),
+      );
+    }
+    setSaveTitleModalOpen(false);
   };
 
   return (
@@ -266,30 +338,43 @@ export default function HomeView() {
               Loading conversation…
             </div>
           )}
-          {!loading && messages.map((msg, idx) => (
-            <div key={idx} className={`chat-message ${msg.sender}`}>
-              <div className="chat-bubble">
-                {msg.audioUrl && (
-                  <audio
-                    className="chat-audio-player"
-                    src={msg.id && playbackUrls[msg.id] ? playbackUrls[msg.id] : msg.audioUrl}
-                    controls
-                    preload="metadata"
-                    aria-label="Play voice message"
-                  />
-                )}
-                {msg.text && <span className={msg.audioUrl ? "chat-bubble-text" : ""}>{msg.text}</span>}
+          {!loading &&
+            messages.map((msg, idx) => (
+              <div key={idx} className={`chat-message ${msg.sender}`}>
+                <div className="chat-bubble">
+                  {msg.audioUrl && (
+                    <audio
+                      className="chat-audio-player"
+                      src={
+                        msg.id && playbackUrls[msg.id]
+                          ? playbackUrls[msg.id]
+                          : msg.audioUrl
+                      }
+                      controls
+                      preload="metadata"
+                      aria-label="Play voice message"
+                    />
+                  )}
+                  {msg.text && (
+                    <span className={msg.audioUrl ? "chat-bubble-text" : ""}>
+                      {msg.text}
+                    </span>
+                  )}
+                </div>
+                <div className="chat-time">
+                  {new Date(msg.timestamp).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
               </div>
-              <div className="chat-time">
-                {new Date(msg.timestamp).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </div>
-            </div>
-          ))}
+            ))}
           {!loading && sending && (
-            <div className="chat-message ai chat-typing" aria-live="polite" aria-label="Assistant is typing">
+            <div
+              className="chat-message ai chat-typing"
+              aria-live="polite"
+              aria-label="Assistant is typing"
+            >
               <div className="chat-bubble chat-typing-bubble">
                 <span className="chat-typing-dot" />
                 <span className="chat-typing-dot" />
@@ -300,25 +385,28 @@ export default function HomeView() {
         </div>
 
         <div className="input-zone">
+          {}
           <div className="chat-controls">
-            <button
-              type="button"
-              className="control-btn"
-              onClick={handleNewChat}
-              title="New Chat"
-              aria-label="Start new chat"
-            >
-              <svg
-                width="20"
-                height="20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
+            {(currentConversationId != null || isChatActive) && (
+              <button
+                type="button"
+                className="control-btn"
+                onClick={handleNewChat}
+                title="New Chat"
+                aria-label="Start new chat"
               >
-                <path d="M12 4v16m8-8H4" />
-              </svg>
-            </button>
+                <svg
+                  width="20"
+                  height="20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            )}
             {isChatActive && (
               <button
                 type="button"
@@ -327,31 +415,40 @@ export default function HomeView() {
                 title="Clear Chat"
                 aria-label="Clear current chat"
               >
-                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <svg
+                  width="20"
+                  height="20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
                   <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </button>
             )}
-            <button
-              type="button"
-              className={`control-btn ${isTempMode ? "active" : ""}`}
-              id="tempModeBtn"
-              onClick={() => setIsTempMode(!isTempMode)}
-              title="Temporary Chat (Incognito)"
-              aria-label="Toggle temporary chat"
-            >
-              <svg
-                width="20"
-                height="20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
+            {currentConversationId != null && (
+              <button
+                type="button"
+                className="control-btn"
+                onClick={openSaveTitleModal}
+                title="Save / Edit conversation name"
+                aria-label="Edit conversation name"
               >
-                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-            </button>
+                <svg
+                  width="20"
+                  height="20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+                  <polyline points="17 21 17 13 7 13 7 21" />
+                  <polyline points="7 3 7 8 15 8" />
+                </svg>
+              </button>
+            )}
           </div>
 
           <div className="search-aura-container">
@@ -360,7 +457,8 @@ export default function HomeView() {
                 <span className="recording-bar-dot" aria-hidden />
                 <span className="recording-bar-label">Recording</span>
                 <span className="recording-bar-timer">
-                  {Math.floor(recordingSeconds / 60)}:{(recordingSeconds % 60).toString().padStart(2, "0")}
+                  {Math.floor(recordingSeconds / 60)}:
+                  {(recordingSeconds % 60).toString().padStart(2, "0")}
                 </span>
                 <button
                   type="button"
@@ -372,11 +470,19 @@ export default function HomeView() {
                 </button>
               </div>
             )}
-            <div className={`search-aura ${isRecording ? "search-aura-recording" : ""}`} role="search" aria-label="Main input">
+            <div
+              className={`search-aura ${isRecording ? "search-aura-recording" : ""}`}
+              role="search"
+              aria-label="Main input"
+            >
               <input
                 type="text"
                 id="mainInput"
-                placeholder={isRecording ? "Speak now…" : "Tell me what you're thinking or working on..."}
+                placeholder={
+                  isRecording
+                    ? "Speak now…"
+                    : "Tell me what you're thinking or working on..."
+                }
                 autoComplete="off"
                 value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
@@ -392,7 +498,13 @@ export default function HomeView() {
                 disabled={sending}
               >
                 {isRecording ? (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden
+                  >
                     <rect x="6" y="6" width="12" height="12" rx="2" />
                   </svg>
                 ) : (
@@ -671,6 +783,71 @@ export default function HomeView() {
         message="This will clear the current conversation. This cannot be undone."
         confirmLabel="Clear"
       />
+
+      {saveTitleModalOpen && (
+        <div
+          className="add-task-modal-overlay active"
+          onClick={(e) =>
+            e.target === e.currentTarget && setSaveTitleModalOpen(false)
+          }
+          role="presentation"
+        >
+          <div
+            className="add-task-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="save-title-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="add-task-modal-close"
+              onClick={() => setSaveTitleModalOpen(false)}
+              aria-label="Close"
+            >
+              <svg
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+            <h2 id="save-title-title" className="add-task-modal-title">
+              Edit conversation name
+            </h2>
+            <input
+              type="text"
+              className="auth-input add-task-form-row"
+              value={saveTitleValue}
+              onChange={(e) => setSaveTitleValue(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && confirmSaveTitle()}
+              placeholder="Conversation name"
+              maxLength={500}
+              autoFocus
+            />
+            <div className="add-task-actions">
+              <button
+                type="button"
+                className="btn-resume"
+                onClick={() => setSaveTitleModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn-resume"
+                onClick={confirmSaveTitle}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

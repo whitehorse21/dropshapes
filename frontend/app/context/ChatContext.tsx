@@ -28,6 +28,7 @@ interface ChatContextValue {
   fetchConversations: () => Promise<void>;
   selectConversation: (id: number) => Promise<void>;
   deleteConversation: (id: number) => Promise<void>;
+  updateConversationTitle: (id: number, title: string) => Promise<void>;
   newChat: () => void;
   setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
   setCurrentConversationId: (id: number | null) => void;
@@ -88,6 +89,17 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
   }, [currentConversationId]);
 
+  const updateConversationTitle = useCallback(async (id: number, title: string) => {
+    try {
+      await axiosInstance.patch(ApiEndpoints.chatConversationUpdate(id), { title: title.trim() });
+      setConversations((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, title: title.trim() } : c))
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
   const newChat = useCallback(() => {
     setMessages([]);
     setCurrentConversationIdState(null);
@@ -109,6 +121,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     fetchConversations,
     selectConversation,
     deleteConversation,
+    updateConversationTitle,
     newChat,
     setMessages,
     setCurrentConversationId: setCurrentConversationIdState,
