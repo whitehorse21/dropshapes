@@ -97,4 +97,11 @@ class Settings(BaseSettings):
     TRIAL_RESUME_LIMIT: int = 3  # Number of free resumes for new users
     TRIAL_COVER_LETTER_LIMIT: int = 3  # Number of free cover letters for new users
 
+    # Chat Assistant (Claude)
+    ANTHROPIC_API_KEY: str = ""
+    CLAUDE_MODEL: str = "claude-sonnet-4-6"  # override in .env; alternatives: claude-opus-4-6, claude-haiku-4-5
+
+    # Speech-to-text for chat voice input (faster-whisper, local; no API key)
+    WHISPER_MODEL_SIZE: str = "base"  # tiny, base, small, medium, large-v2, large-v3
+
 settings = Settings()

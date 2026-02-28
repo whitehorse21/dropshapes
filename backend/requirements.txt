@@ -46,3 +46,7 @@ PyPDF2
 
 # PDF Generation
 reportlab
+
+# Chat assistant
+anthropic
+faster-whisper

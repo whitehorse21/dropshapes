@@ -67,16 +67,18 @@ axiosInstance.interceptors.request.use(
           config.url.match(/\/\d+$/) || // Any endpoint ending with a number (resource by ID)
           config.url.includes('/duplicate/') || // Duplicate endpoints
           config.url.includes('/clone/') || // Clone endpoints
-          config.url.includes('drive/import')) { // Drive bulk import
+          config.url.includes('drive/import') || // Drive bulk import
+          config.url.includes('chat/messages/')) { // Chat message audio (no trailing slash)
         // Remove trailing slash for these endpoints to prevent redirects
         if (config.url.endsWith('/')) {
           config.url = config.url.slice(0, -1);
         }
       } else {
-        // For other endpoints, handle trailing slashes carefully
-        // Only add trailing slash if it doesn't already end with one
-        if (config.url && !config.url.endsWith('/') && config.url !== '') {
-          config.url = `${config.url}/`;
+        // For other endpoints, add trailing slash to the path only (not after query string)
+        if (config.url && config.url !== '') {
+          const [path, query] = config.url.split('?');
+          const pathWithSlash = path.endsWith('/') ? path : `${path}/`;
+          config.url = query ? `${pathWithSlash}?${query}` : pathWithSlash;
         }
       }
       
@@ -159,12 +161,13 @@ axiosInstance.interceptors.response.use(
     }
       // Log detailed error information for debugging (but less verbose)
     if (error.response) {
+      const detail = error.response.data?.detail ?? error.response.data;
       console.error('API Error:', {
         status: error.response.status,
         statusText: error.response.statusText,
         url: error.config?.url,
         method: error.config?.method,
-        data: error.response.data ? Object.keys(error.response.data) : 'No data'
+        detail: typeof detail === 'string' ? detail : (error.response.data ? Object.keys(error.response.data) : 'No data')
       });    
     } else if (error.request) {
       // Enhanced network error details

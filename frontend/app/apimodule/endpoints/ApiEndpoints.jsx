@@ -70,6 +70,16 @@ const endpoints = {
   drive: formatEndpoint('drive'),
   driveImport: 'drive/import',
 
+  // Chat assistant (Claude)
+  chatConversations: formatEndpoint('chat/conversations'),
+  chatConversation: (id) => `chat/conversations/${id}`,
+  chatMessage: formatEndpoint('chat/message'),
+  chatAudio: formatEndpoint('chat/audio'),
+  /** Playback URL for a voice message (backend redirects to presigned S3). Use with axios baseURL. */
+  chatMessageAudio: (messageId) => `chat/messages/${messageId}/audio`,
+  /** Get a playable URL with token for a voice message (use as <audio src>. */
+  chatMessageAudioUrl: (messageId) => `chat/messages/${messageId}/audio-url`,
+
   // Task list (backend prefix /tasks)
   tasksList: formatEndpoint('tasks'),
 

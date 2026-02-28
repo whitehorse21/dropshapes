@@ -24,6 +24,7 @@ from app.api.endpoints import (
     admin,
     billing,
     drive,
+    chat_assistant,
 )
 
 # Create API router
@@ -42,6 +43,7 @@ api_router.include_router(billing.router, prefix="/billing", tags=["billing"])
 api_router.include_router(signatures.router, prefix="/signatures", tags=["signatures"])
 api_router.include_router(drive.router, prefix="/drive", tags=["drive"])
 api_router.include_router(credits.router, prefix="/credits", tags=["credits"])
+api_router.include_router(chat_assistant.router, prefix="/chat", tags=["chat-assistant"])
 
 # Educational Content Only
 api_router.include_router(resources.router, prefix="/resources", tags=["resources"])

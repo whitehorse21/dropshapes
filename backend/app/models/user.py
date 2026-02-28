@@ -35,3 +35,4 @@ class User(Base):
     performance_records = relationship("UserPerformance", back_populates="user")
     invoices = relationship("Invoice", back_populates="user")
     drive_items = relationship("DriveItem", back_populates="user")
+    chat_conversations = relationship("ChatConversation", back_populates="user", cascade="all, delete-orphan")

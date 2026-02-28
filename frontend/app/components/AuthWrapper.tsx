@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useAuth } from "../context/AuthContext";
+import { ChatProvider } from "../context/ChatContext";
 import LoginView from "./views/LoginView";
 import Dock from "./Dock";
 import ProfileWidget from "./ProfileWidget";
@@ -44,7 +45,7 @@ export default function AuthWrapper({
   }
 
   return (
-    <>
+    <ChatProvider>
       <a className="skip-link" href="#mainContent">
         Skip to main content
       </a>
@@ -90,6 +91,6 @@ export default function AuthWrapper({
         </div>
         <span id="toast-msg">Ready</span>
       </div>
-    </>
+    </ChatProvider>
   );
 }

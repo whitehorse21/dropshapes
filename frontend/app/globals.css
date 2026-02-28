@@ -1234,11 +1234,64 @@ body.high-contrast-mode .header-minimal h1 {
   backdrop-filter: blur(10px);
 }
 
+.chat-bubble:has(.chat-audio-player) {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chat-audio-player {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  height: 40px;
+  border-radius: 8px;
+  outline: none;
+}
+
+.chat-audio-player::-webkit-media-controls-panel {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.chat-message.user .chat-audio-player::-webkit-media-controls-panel {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.chat-bubble-text {
+  display: block;
+}
+
 .chat-time {
   font-size: 0.75rem;
   color: var(--text-tertiary);
   margin-top: 6px;
   padding: 0 4px;
+}
+
+/* Typing indicator while waiting for chatbot response */
+.chat-typing .chat-typing-bubble {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 16px 20px;
+}
+
+.chat-typing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+  animation: chatTypingBounce 1.4s ease-in-out infinite both;
+}
+
+.chat-typing-dot:nth-child(1) { animation-delay: 0s; }
+.chat-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.chat-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes chatTypingBounce {
+  0%, 80%, 100% { transform: scale(0.75); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
 }
 
 /* Input Area (Bottom) */
@@ -1487,10 +1540,83 @@ body.high-contrast-mode .header-minimal h1 {
   transform: scale(0.9) !important;
 }
 
-.btn-mic.listening {
+.btn-mic.listening,
+.btn-mic.recording {
   color: var(--danger-red);
-  background: rgba(255, 76, 76, 0.1);
-  animation: pulse 1s infinite;
+  background: rgba(255, 76, 76, 0.15);
+  animation: recordingPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes recordingPulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255, 76, 76, 0.35); }
+  50% { opacity: 0.9; box-shadow: 0 0 0 8px rgba(255, 76, 76, 0); }
+}
+
+/* Recording bar above search when voice input is active */
+.recording-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  margin-bottom: 8px;
+  background: rgba(255, 76, 76, 0.08);
+  border: 1px solid rgba(255, 76, 76, 0.25);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.recording-bar-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--danger-red, #e53935);
+  animation: recordingPulse 1.5s ease-in-out infinite;
+}
+
+.recording-bar-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.recording-bar-timer {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
+.recording-bar-stop {
+  padding: 6px 14px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  background: var(--danger-red, #e53935);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.recording-bar-stop:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+.recording-bar-stop:active {
+  transform: scale(0.98);
+}
+
+.search-aura-recording {
+  border-color: rgba(255, 76, 76, 0.4);
+  box-shadow: 0 4px 20px rgba(255, 76, 76, 0.12);
+}
+
+.search-aura-recording:focus-within {
+  border-color: rgba(255, 76, 76, 0.6);
+  box-shadow: 0 8px 30px rgba(255, 76, 76, 0.15);
 }
 
 .btn-submit {

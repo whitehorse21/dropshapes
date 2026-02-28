@@ -7,6 +7,17 @@ from botocore.exceptions import ClientError
 
 from app.core.config import settings
 
+
+def _s3_key_from_url(url: str) -> Optional[str]:
+    """Extract S3 object key from a bucket URL. Returns None if not our bucket URL."""
+    if not url:
+        return None
+    prefix = f"https://{settings.AWS_S3_BUCKET_NAME}.s3.{settings.AWS_S3_REGION}.amazonaws.com/"
+    if url.startswith(prefix):
+        return url[len(prefix) :].split("?")[0]
+    return None
+
+
 class S3Storage:
     def __init__(self):
         self.s3_client = boto3.client(
@@ -50,22 +61,30 @@ class S3Storage:
         finally:
             await file.seek(0)  # Reset file cursor
 
-    def upload_file_content(self, file_obj, key: str, content_type: str = "application/pdf") -> str:
-        """Upload file content (bytes or file-like object) to S3 and return the URL"""
+    def upload_file_content(
+        self,
+        file_obj,
+        key: str,
+        content_type: str = "application/pdf",
+        public_read: bool = False,
+    ) -> str:
+        """Upload file content (bytes or file-like object) to S3 and return the URL.
+        If public_read=True, sets ACL so the URL is playable in browser (e.g. chat voice messages).
+        """
         try:
-            # If it's a file-like object, read its contents
-            if hasattr(file_obj, 'read'):
+            if hasattr(file_obj, "read"):
                 contents = file_obj.read()
             else:
                 contents = file_obj
-                
-            self.s3_client.put_object(
-                Bucket=self.bucket_name,
-                Key=key,
-                Body=contents,
-                ContentType=content_type
-            )
-            # Generate URL
+            params = {
+                "Bucket": self.bucket_name,
+                "Key": key,
+                "Body": contents,
+                "ContentType": content_type,
+            }
+            if public_read:
+                params["ACL"] = "public-read"
+            self.s3_client.put_object(**params)
             url = f"https://{self.bucket_name}.s3.{settings.AWS_S3_REGION}.amazonaws.com/{key}"
             return url
         except ClientError as e:
@@ -78,9 +97,9 @@ class S3Storage:
     def delete_file(self, file_url: str) -> bool:
         """Delete a file from S3"""
         try:
-            # Extract the key from the URL
-            key = file_url.split(f"https://{self.bucket_name}.s3.{settings.AWS_S3_REGION}.amazonaws.com/")[1]
-            
+            key = _s3_key_from_url(file_url)
+            if not key:
+                return False
             self.s3_client.delete_object(
                 Bucket=self.bucket_name,
                 Key=key
@@ -90,10 +109,25 @@ class S3Storage:
             print(f"Error deleting from S3: {e}")
             return False
 
+    def generate_presigned_url(self, file_url: str, expires_in: int = 3600) -> Optional[str]:
+        """Generate a presigned GET URL for private S3 object. Returns None if URL is not our S3 URL."""
+        key = _s3_key_from_url(file_url)
+        if not key:
+            return None
+        try:
+            return self.s3_client.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": self.bucket_name, "Key": key},
+                ExpiresIn=expires_in,
+            )
+        except ClientError as e:
+            print(f"Error generating presigned URL: {e}")
+            return None
 
 
 # Factory function to return appropriate storage based on settings
 def get_storage():
     if settings.USE_S3_STORAGE:
         return S3Storage()
-    return LocalStorage()
+    # When S3 is disabled, return a no-op stub so callers don't break
+    return None

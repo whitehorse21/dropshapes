@@ -21,5 +21,6 @@ from app.models.interview import (
     DifficultyLevelEnum,
     AnswerTypeEnum
 )
+from app.models.chat import ChatConversation, ChatMessage
 
 # This module exports all models for easy importing
