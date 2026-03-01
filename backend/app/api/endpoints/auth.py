@@ -12,7 +12,7 @@ from app.core.auth import (
 )
 from app.core.config import settings
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse, Token, UserLogin
+from app.schemas.user import UserCreate, UserResponse, Token, UserLogin, UserUpdate
 from app.services.ai_credits_service import AICreditService
 from app.db.utils import db_retry
 
@@ -192,6 +192,26 @@ def logout(current_user: User = Depends(get_current_active_user)):
 @router.get("/me", response_model=UserResponse)
 def get_current_user_info(current_user: User = Depends(get_current_active_user)):
     """Get current user information"""
+    return current_user
+
+
+@router.patch("/me", response_model=UserResponse)
+def update_current_user_profile(
+    profile_in: UserUpdate,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
+    """Update current user profile (name, username, email, phone, bio, location, website, profile_image)."""
+    update_data = profile_in.model_dump(exclude_unset=True)
+    if not update_data:
+        return current_user
+
+    for key, value in update_data.items():
+        if hasattr(current_user, key):
+            setattr(current_user, key, value)
+
+    db.commit()
+    db.refresh(current_user)
     return current_user
 
 @router.get("/credits")

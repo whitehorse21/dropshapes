@@ -7,9 +7,14 @@ import {
   Cpu,
   DollarSign,
   Loader2,
+  LayoutDashboard,
+  BarChart3,
 } from 'lucide-react';
 import apiService from '@/app/apimodule/utils/apiService';
 import endpoints from '@/app/apimodule/endpoints/ApiEndpoints';
+import AdminFeatureUsageChart from './components/AdminFeatureUsageChart';
+import SubscriptionPlansTable from './components/SubscriptionPlansTable';
+import AdminAiPerformanceCard from './components/AdminAiPerformanceCard';
 
 interface DashboardStats {
   overview: {
@@ -63,11 +68,16 @@ export default function AdminDashboardPage() {
       <div className="admin-content">
         <div className="admin-page-header">
           <h1>Admin Dashboard</h1>
-          <p>Users, activity & revenue</p>
+          <p>Overview of users, activity and revenue</p>
         </div>
-        <div className="flex min-h-[200px] items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card-bg)]">
-          <Loader2 className="h-10 w-10 animate-spin text-[var(--accent)]" aria-hidden />
-        </div>
+        <section className="admin-section-card">
+          <div className="admin-section-card-body">
+            <div className="admin-section-loading-cell" style={{ margin: 0, padding: '48px 24px' }}>
+              <Loader2 className="admin-section-spinner" aria-hidden />
+              <span>Loading dashboard…</span>
+            </div>
+          </div>
+        </section>
       </div>
     );
   }
@@ -77,16 +87,21 @@ export default function AdminDashboardPage() {
       <div className="admin-content">
         <div className="admin-page-header">
           <h1>Admin Dashboard</h1>
-          <p>Users, activity & revenue</p>
+          <p>Overview of users, activity and revenue</p>
         </div>
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--card-bg)] p-4 text-center">
-          <p className="text-[var(--danger-red)]">{error ?? 'No data'}</p>
-        </div>
+        <section className="admin-section-card">
+          <div className="admin-section-card-body">
+            <div className="admin-section-empty-cell">
+              <p className="text-[var(--danger-red)]">{error ?? 'No data'}</p>
+              <span>Failed to load dashboard stats</span>
+            </div>
+          </div>
+        </section>
       </div>
     );
   }
 
-  const { overview, subscriptions, recent_activity } = stats;
+  const { overview, subscriptions, recent_activity, ai_performance } = stats;
 
   return (
     <div className="admin-content">
@@ -95,7 +110,15 @@ export default function AdminDashboardPage() {
         <p>Overview of users, activity and revenue</p>
       </div>
 
-      <div className="group-title">OVERVIEW</div>
+      <section className="admin-section-card" aria-labelledby="dashboard-overview-heading">
+        <div className="admin-section-card-header">
+          <LayoutDashboard className="admin-section-card-icon" aria-hidden />
+          <h2 id="dashboard-overview-heading" className="admin-section-card-title" style={{ marginBottom: 0 }}>
+            Overview
+          </h2>
+          <p className="admin-section-card-desc">Key metrics at a glance.</p>
+        </div>
+        <div className="admin-section-card-body">
       <div className="admin-overview-grid">
         <div className="admin-stat-card admin-stat-card-accent">
           <div className="admin-stat-icon">
@@ -133,55 +156,64 @@ export default function AdminDashboardPage() {
             <p className="admin-stat-value">${Number(overview.revenue?.total ?? 0).toFixed(2)}</p>
           </div>
         </div>
-      </div>
+        </div>
+        </div>
+      </section>
 
-      <div className="group-title">RECENT ACTIVITY</div>
-      <div className="admin-section-card admin-recent-activity overflow-hidden">
+      <section className="admin-section-card" aria-labelledby="dashboard-usage-heading">
         <div className="admin-section-card-header">
-          <h2 className="admin-section-title">Recent Activity</h2>
+          <BarChart3 className="admin-section-card-icon" aria-hidden />
+          <h2 id="dashboard-usage-heading" className="admin-section-card-title" style={{ marginBottom: 0 }}>
+            Feature usage & subscriptions
+          </h2>
+          <p className="admin-section-card-desc">Usage by feature and active plans.</p>
         </div>
-        <div className="admin-recent-activity-table-wrap">
-          <table className="admin-recent-activity-table">
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Action</th>
-                <th>Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(recent_activity?.length ?? 0) > 0 ? (
-                recent_activity.map((activity, i) => (
-                  <tr key={i}>
-                    <td className="font-medium text-[var(--text-primary)]">{activity.user}</td>
-                    <td className="text-[var(--text-secondary)]">{activity.action}</td>
-                    <td className="text-[var(--text-tertiary)]">{new Date(activity.time).toLocaleString()}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={3} className="admin-recent-activity-empty">No recent activity</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <div className="admin-section-card-body">
+          <div className="dashboard-usage-grid">
+            <AdminFeatureUsageChart embedded />
+            <SubscriptionPlansTable
+              embedded
+              activePlans={subscriptions?.active_plans}
+              totalSubscribers={subscriptions?.total_subscribers ?? 0}
+            />
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div className="group-title">SUBSCRIPTIONS</div>
-      <div className="admin-card">
-        <p className="text-2xl font-bold text-[var(--text-primary)]">{subscriptions?.total_subscribers ?? 0}</p>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">Total subscribers</p>
-        {Array.isArray(subscriptions?.active_plans) && subscriptions.active_plans.length > 0 && (
-          <ul className="mt-3 space-y-1.5">
-            {subscriptions.active_plans.slice(0, 5).map((plan: Record<string, unknown>, i: number) => (
-              <li key={i} className="text-sm text-[var(--text-secondary)] flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" aria-hidden />
-                {String(plan.name ?? plan.id ?? 'Plan')}
-              </li>
-            ))}
-          </ul>
-        )}
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-5 w-full">
+        <div className="admin-section-card admin-recent-activity overflow-hidden flex-1 min-w-0">
+          <div className="admin-section-card-header">
+            <h2 className="admin-section-card-title" style={{ marginBottom: 0 }}>Recent activity</h2>
+            <p className="admin-section-card-desc">Latest user actions.</p>
+          </div>
+          <div className="admin-recent-activity-table-wrap">
+            <table className="admin-recent-activity-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Action</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(recent_activity?.length ?? 0) > 0 ? (
+                  recent_activity.map((activity, i) => (
+                    <tr key={i}>
+                      <td className="font-medium text-[var(--text-primary)]">{activity.user}</td>
+                      <td className="text-[var(--text-secondary)]">{activity.action}</td>
+                      <td className="text-[var(--text-tertiary)]">{new Date(activity.time).toLocaleString()}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={3} className="admin-recent-activity-empty">No recent activity</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <AdminAiPerformanceCard aiPerformance={ai_performance} />
       </div>
     </div>
   );

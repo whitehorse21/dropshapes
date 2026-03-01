@@ -61,10 +61,9 @@ export default function AdminDashboardLayout({
 
   return (
     <AdminGuard>
-      {/* z-[2001] so admin UI is above the fixed logo (z-2000). overflow-x-hidden prevents horizontal scroll when sidebar opens. */}
+      {/* Full-screen admin: no app chrome (dock/profile/logo) when rendered from AuthWrapper. */}
       <div
-        className="admin-layout-root relative z-[2001] flex flex-row min-h-screen w-full min-w-0 overflow-x-hidden bg-[var(--bg)]"
-        style={{ minHeight: "100vh" }}
+        className="admin-layout-root fixed inset-0 z-[2001] flex flex-row min-h-screen w-full min-w-0 overflow-x-hidden bg-[var(--bg)]"
       >
         {/* Overlay when sidebar drawer is open (mobile only) */}
         {sidebarOpen && (
@@ -155,7 +154,7 @@ export default function AdminDashboardLayout({
           </header>
 
           <main
-            className="flex-1 overflow-auto min-h-0 w-full bg-[var(--bg)]"
+            className="admin-main-content flex-1 overflow-auto min-h-0 min-w-0 w-full max-w-full bg-[var(--bg)]"
             id="mainContent"
             style={{
               flex: "1 1 auto",

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Mail } from 'lucide-react';
 import apiService from '@/app/apimodule/utils/apiService';
 import endpoints from '@/app/apimodule/endpoints/ApiEndpoints';
 import ConfirmDeleteModal from '@/app/components/modals/ConfirmDeleteModal';
@@ -77,62 +77,76 @@ export default function AdminContactsPage() {
     <div className="admin-content">
       <div className="admin-page-header">
         <h1>Contact Inquiries</h1>
-        <p>View & manage form submissions</p>
+        <p>View and manage form submissions</p>
       </div>
 
-      <div className="group-title">INQUIRIES</div>
-      <div className="admin-table-wrap">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-[var(--border)] bg-[var(--surface)]">
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)]">Name</th>
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)]">Email</th>
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)] hidden sm:table-cell">Phone</th>
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)]">Subject</th>
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)]">Created</th>
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)]">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-12 text-center">
-                  <Loader2 className="mx-auto h-8 w-8 animate-spin text-[var(--accent)]" aria-hidden />
-                </td>
-              </tr>
-            ) : inquiries.length > 0 ? (
-              inquiries.map((inquiry) => (
-                <tr
-                  key={inquiry.id}
-                  className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--card-hover)] cursor-pointer"
-                  onClick={() => openDetail(inquiry)}
-                >
-                  <td className="px-4 py-3 font-medium text-[var(--text-primary)]">{inquiry.name}</td>
-                  <td className="px-4 py-3 text-[var(--text-secondary)]">{inquiry.email}</td>
-                  <td className="px-4 py-3 text-[var(--text-secondary)] hidden sm:table-cell">{inquiry.phone ?? '—'}</td>
-                  <td className="px-4 py-3 text-[var(--text-secondary)] max-w-[180px] truncate">{inquiry.subject ?? '—'}</td>
-                  <td className="px-4 py-3 text-[var(--text-tertiary)] text-xs sm:text-sm">{formatDate(inquiry.created_at)}</td>
-                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      type="button"
-                      onClick={() => confirmDelete(inquiry.id)}
-                      className="text-[var(--danger-red)] hover:underline text-sm"
-                    >
-                      Delete
-                    </button>
-                  </td>
+      <section className="admin-section-card" aria-labelledby="admin-contacts-heading">
+        <div className="admin-section-card-header">
+          <Mail className="admin-section-card-icon" aria-hidden />
+          <h2 id="admin-contacts-heading" className="admin-section-card-title">
+            Inquiries
+          </h2>
+          <p className="admin-section-card-desc">
+            Click a row to view details or delete.
+          </p>
+        </div>
+        <div className="admin-section-card-body">
+          <div className="admin-section-table-wrap">
+            <table className="admin-section-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th className="hidden sm:table-cell">Phone</th>
+                  <th>Subject</th>
+                  <th>Created</th>
+                  <th>Actions</th>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-[var(--text-secondary)]">
-                  No inquiries found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="admin-section-loading-cell">
+                      <Loader2 className="admin-section-spinner" aria-hidden />
+                      <span>Loading inquiries…</span>
+                    </td>
+                  </tr>
+                ) : inquiries.length > 0 ? (
+                  inquiries.map((inquiry) => (
+                    <tr
+                      key={inquiry.id}
+                      className="cursor-pointer"
+                      onClick={() => openDetail(inquiry)}
+                    >
+                      <td className="font-medium text-[var(--text-primary)]">{inquiry.name}</td>
+                      <td className="text-[var(--text-secondary)]">{inquiry.email}</td>
+                      <td className="text-[var(--text-secondary)] hidden sm:table-cell">{inquiry.phone ?? '—'}</td>
+                      <td className="text-[var(--text-secondary)] max-w-[180px] truncate">{inquiry.subject ?? '—'}</td>
+                      <td className="text-[var(--text-tertiary)] text-xs sm:text-sm">{formatDate(inquiry.created_at)}</td>
+                      <td onClick={(e) => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          onClick={() => confirmDelete(inquiry.id)}
+                          className="text-[var(--danger-red)] hover:underline text-sm"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="admin-section-empty-cell">
+                      <p>No inquiries found</p>
+                      <span>Form submissions will appear here</span>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
       {/* Detail modal */}
       {selected && (

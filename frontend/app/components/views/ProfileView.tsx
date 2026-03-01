@@ -15,7 +15,7 @@ const defaultForm: Record<string, string> = {
 };
 
 export default function ProfileView() {
-  const { user, logout, updateUser } = useAuth();
+  const { user, logout, updateUser, updateProfile } = useAuth();
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -47,7 +47,7 @@ export default function ProfileView() {
     setIsSaving(true);
     setMessage(null);
     try {
-      updateUser({
+      const result = await updateProfile({
         name: formData.name,
         username: formData.username,
         email: formData.email,
@@ -56,8 +56,12 @@ export default function ProfileView() {
         location: formData.location,
         website: formData.website,
       });
-      setMessage({ type: 'success', text: 'Profile updated successfully.' });
-      setIsEditing(false);
+      if (result.success) {
+        setMessage({ type: 'success', text: 'Profile updated successfully.' });
+        setIsEditing(false);
+      } else {
+        setMessage({ type: 'error', text: result.error || 'Failed to update profile. Please try again.' });
+      }
     } catch {
       setMessage({ type: 'error', text: 'Failed to update profile. Please try again.' });
     } finally {

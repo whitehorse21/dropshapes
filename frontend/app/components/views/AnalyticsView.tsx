@@ -74,9 +74,18 @@ export default function AnalyticsView() {
     try {
       const res = await apiService.get(endpoints.tasksList);
       const data = res?.data;
-      const list = Array.isArray(data) ? data : (data && typeof data === 'object' && Array.isArray(data.tasks) ? data.tasks : []);
+      const raw = Array.isArray(data) ? data : (data && typeof data === 'object' && Array.isArray(data.tasks) ? data.tasks : []);
+      const list: Task[] = (raw || []).map((t: Record<string, unknown>) => ({
+        id: Number(t.id),
+        title: String(t.title ?? ''),
+        status: String(t.status ?? 'pending'),
+        category: t.category != null ? String(t.category) : undefined,
+        priority: t.priority != null ? String(t.priority) : undefined,
+        created_at: t.created_at != null ? String(t.created_at) : undefined,
+        completed_at: t.completed_at != null ? String(t.completed_at) : null,
+      }));
       setTasks(list);
-    } catch (err) {
+    } catch {
       setTasks([]);
       setError('Could not load task data. You can try again.');
     } finally {
@@ -131,12 +140,30 @@ export default function AnalyticsView() {
     pct: maxTrend > 0 ? (d.usage / maxTrend) * 100 : 0,
   }));
 
-  const previousWeekTotal = 28;
   const currentWeekTotal = trendsData.reduce((a, d) => a + d.usage, 0);
+  const previousWeekTotal = (() => {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const thisMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    thisMonday.setDate(thisMonday.getDate() + mondayOffset);
+    const lastMonday = new Date(thisMonday.getTime());
+    lastMonday.setDate(lastMonday.getDate() - 7);
+    const lastSunday = new Date(lastMonday.getTime());
+    lastSunday.setDate(lastSunday.getDate() + 6);
+    lastSunday.setHours(23, 59, 59, 999);
+    return tasks.filter((t) => {
+      if (!t.created_at) return false;
+      const created = new Date(t.created_at).getTime();
+      return created >= lastMonday.getTime() && created <= lastSunday.getTime();
+    }).length;
+  })();
   const trendChange =
     previousWeekTotal > 0
       ? (((currentWeekTotal - previousWeekTotal) / previousWeekTotal) * 100).toFixed(1)
-      : '0';
+      : currentWeekTotal > 0
+        ? '100'
+        : '0';
   const trendPositive = Number(trendChange) >= 0;
 
   const recommendations: string[] = [];

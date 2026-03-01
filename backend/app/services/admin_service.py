@@ -4,7 +4,7 @@ Admin service for dashboard statistics and admin-only operations
 
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from typing import List, Tuple, Dict, Any, Optional
 
 from app.models.user import User
@@ -168,61 +168,60 @@ class AdminService:
     
     @staticmethod
     def get_recent_activity(db: Session, limit: int = 10) -> List[Dict[str, str]]:
-        """Get recent user activity"""
-        today = date.today()
-        start_of_today = datetime.combine(today, datetime.min.time())
-        
+        """Get recent user activity from the last 7 days (interviews, resumes, cover letters)."""
+        since = datetime.now(timezone.utc) - timedelta(days=7)
+
         recent_activity = []
-        
+
         # Get recent interview sessions with full user details
         recent_interviews = db.query(InterviewSession, User.name, User.username, User.email).join(User).filter(
-            InterviewSession.created_at >= start_of_today
-        ).order_by(desc(InterviewSession.created_at)).limit(5).all()
-        
+            InterviewSession.created_at >= since
+        ).order_by(desc(InterviewSession.created_at)).limit(15).all()
+
         for session, user_name, username, email in recent_interviews:
-            # Use name priority: name -> username -> email -> fallback
             display_name = AdminService._get_user_display_name(
                 user_name, username, email, session.user_id
             )
+            created = session.created_at
             recent_activity.append({
                 "user": display_name,
                 "action": "Used AI Interview Preparation",
-                "time": session.created_at.isoformat()
+                "time": created.isoformat() if hasattr(created, "isoformat") else str(created),
             })
-        
+
         # Get recent resumes with full user details
         recent_resumes = db.query(Resume, User.name, User.username, User.email).join(User).filter(
-            Resume.created_at >= start_of_today
-        ).order_by(desc(Resume.created_at)).limit(3).all()
-        
+            Resume.created_at >= since
+        ).order_by(desc(Resume.created_at)).limit(15).all()
+
         for resume, user_name, username, email in recent_resumes:
-            # Use name priority: name -> username -> email -> fallback
             display_name = AdminService._get_user_display_name(
                 user_name, username, email, resume.user_id
             )
+            created = resume.created_at
             recent_activity.append({
                 "user": display_name,
                 "action": "Generated AI Resume",
-                "time": resume.created_at.isoformat()
+                "time": created.isoformat() if hasattr(created, "isoformat") else str(created),
             })
-        
+
         # Get recent cover letters with full user details
         recent_cover_letters = db.query(CoverLetter, User.name, User.username, User.email).join(User).filter(
-            CoverLetter.created_at >= start_of_today
-        ).order_by(desc(CoverLetter.created_at)).limit(2).all()
-        
+            CoverLetter.created_at >= since
+        ).order_by(desc(CoverLetter.created_at)).limit(15).all()
+
         for cover_letter, user_name, username, email in recent_cover_letters:
-            # Use name priority: name -> username -> email -> fallback
             display_name = AdminService._get_user_display_name(
                 user_name, username, email, cover_letter.user_id
             )
+            created = cover_letter.created_at
             recent_activity.append({
                 "user": display_name,
-                "action": "Checked Grammar for Cover Letter",
-                "time": cover_letter.created_at.isoformat()
+                "action": "Created Cover Letter",
+                "time": created.isoformat() if hasattr(created, "isoformat") else str(created),
             })
-        
-        # Sort by time and limit results
+
+        # Sort by time descending and limit
         recent_activity.sort(key=lambda x: x["time"], reverse=True)
         return recent_activity[:limit]
     

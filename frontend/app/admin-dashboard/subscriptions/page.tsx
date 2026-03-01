@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Pencil, Plus, Loader2, X } from "lucide-react";
+import { Pencil, Plus, Loader2, X, CreditCard, AlertCircle } from "lucide-react";
 import apiService from "@/app/apimodule/utils/apiService";
 import endpoints from "@/app/apimodule/endpoints/ApiEndpoints";
 
@@ -131,134 +131,128 @@ export default function AdminSubscriptionsPage() {
       <div className="admin-content">
         <div className="admin-page-header">
           <h1>Subscription Plans</h1>
-          <p>Edit plans, limits & pricing</p>
+          <p>Add, edit plans, limits and pricing</p>
         </div>
-        <div className="flex min-h-[40vh] items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--card-bg)]">
-          <Loader2
-            className="h-10 w-10 animate-spin text-[var(--accent)]"
-            aria-hidden
-          />
-        </div>
+        <section className="admin-section-card">
+          <div className="admin-section-card-body">
+            <div className="admin-section-loading-cell" style={{ margin: 0 }}>
+              <Loader2 className="admin-section-spinner" aria-hidden />
+              <span>Loading plans…</span>
+            </div>
+          </div>
+        </section>
       </div>
     );
   }
 
   return (
     <div className="admin-content">
-      <div className="admin-page-header admin-page-header-with-action">
-        <div>
-          <h1>Subscription Plans</h1>
-          <p>Add, edit plans, limits & pricing</p>
-        </div>
+      <div className="admin-page-header">
+        <h1>Subscription Plans</h1>
+        <p>Add, edit plans, limits and pricing</p>
       </div>
-      <button
-        type="button"
-        onClick={openAdd}
-        className="admin-primary-btn flex items-center gap-2 px-4 py-2"
-      >
-        <Plus className="h-4 w-4" aria-hidden />
-        Add plan
-      </button>
-      {error && (
-        <p className="rounded-lg bg-[var(--danger-red)]/20 px-4 py-2 text-sm text-[var(--danger-red)]">
-          {error}
-        </p>
-      )}
 
-      <div className="admin-table-wrap">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-[var(--border)] bg-[var(--surface)]">
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)]">
-                Plan
-              </th>
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)]">
-                Description
-              </th>
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)]">
-                Price
-              </th>
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)]">
-                Interval
-              </th>
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)]">
-                Resume Limit
-              </th>
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)]">
-                Cover Letter Limit
-              </th>
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)]">
-                Status
-              </th>
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)]">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {plans.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={8}
-                  className="px-4 py-3 text-center text-[var(--text-secondary)] admin-table-empty-cell"
-                >
-                  No plans found
-                </td>
-              </tr>
-            ) : (
-              plans.map((plan) => (
-                <tr
-                  key={plan.id}
-                  className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--card-hover)]"
-                >
-                  <td className="px-4 py-3 font-medium text-[var(--text-primary)]">
-                    {plan.name}
-                  </td>
-                  <td className="px-4 py-3 text-[var(--text-secondary)] max-w-[200px] truncate">
-                    {plan.description ?? "—"}
-                  </td>
-                  <td className="px-4 py-3">
-                    ${plan.price}
-                    {plan.price === 0 ? " (Free)" : ""}
-                  </td>
-                  <td className="px-4 py-3 text-[var(--text-secondary)]">
-                    {plan.interval}
-                  </td>
-                  <td className="px-4 py-3">
-                    {plan.resume_limit === -1 ? "Unlimited" : plan.resume_limit}
-                  </td>
-                  <td className="px-4 py-3">
-                    {plan.cover_letter_limit === -1
-                      ? "Unlimited"
-                      : plan.cover_letter_limit}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={
-                        plan.is_active !== false
-                          ? "text-[var(--safe-green)]"
-                          : "text-[var(--danger-red)]"
-                      }
-                    >
-                      {plan.is_active !== false ? "Active" : "Inactive"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      type="button"
-                      onClick={() => openEdit(plan)}
-                      className="admin-table-action-btn"
-                      aria-label={`Edit ${plan.name}`}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                  </td>
+      <section className="admin-section-card" aria-labelledby="admin-plans-heading">
+        <div className="admin-section-card-header">
+          <CreditCard className="admin-section-card-icon" aria-hidden />
+          <h2 id="admin-plans-heading" className="admin-section-card-title">
+            Plans
+          </h2>
+          <p className="admin-section-card-desc">
+            Manage plan names, prices, limits and visibility.
+          </p>
+        </div>
+        <div className="admin-section-card-body">
+          {error && (
+            <div className="admin-credits-message admin-credits-message-error" role="alert">
+              <AlertCircle className="admin-credits-message-icon" aria-hidden />
+              <span>{error}</span>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={openAdd}
+            className="admin-section-btn-primary flex items-center gap-2 mb-4"
+          >
+            <Plus className="h-4 w-4" aria-hidden />
+            Add plan
+          </button>
+
+          <div className="admin-section-table-wrap">
+            <table className="admin-section-table">
+              <thead>
+                <tr>
+                  <th>Plan</th>
+                  <th>Description</th>
+                  <th>Price</th>
+                  <th>Interval</th>
+                  <th>Resume Limit</th>
+                  <th>Cover Letter Limit</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {plans.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="admin-section-empty-cell">
+                      <p>No plans found</p>
+                      <span>Add a plan to get started</span>
+                    </td>
+                  </tr>
+                ) : (
+                  plans.map((plan) => (
+                    <tr key={plan.id}>
+                      <td className="font-medium text-[var(--text-primary)]">
+                        {plan.name}
+                      </td>
+                      <td className="text-[var(--text-secondary)] max-w-[200px] truncate">
+                        {plan.description ?? "—"}
+                      </td>
+                      <td>
+                        ${plan.price}
+                        {plan.price === 0 ? " (Free)" : ""}
+                      </td>
+                      <td className="text-[var(--text-secondary)]">
+                        {plan.interval}
+                      </td>
+                      <td>
+                        {plan.resume_limit === -1 ? "Unlimited" : plan.resume_limit}
+                      </td>
+                      <td>
+                        {plan.cover_letter_limit === -1
+                          ? "Unlimited"
+                          : plan.cover_letter_limit}
+                      </td>
+                      <td>
+                        <span
+                          className={
+                            plan.is_active !== false
+                              ? "text-[var(--safe-green)]"
+                              : "text-[var(--danger-red)]"
+                          }
+                        >
+                          {plan.is_active !== false ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          onClick={() => openEdit(plan)}
+                          className="admin-table-action-btn"
+                          aria-label={`Edit ${plan.name}`}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
       {modalOpen && editingPlan && (
         <div

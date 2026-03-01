@@ -2,7 +2,7 @@
 
 // Settings View Component
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSettings, Settings } from '@/app/context/SettingsContext';
@@ -11,12 +11,42 @@ import { useAuth } from '../../context/AuthContext';
 export default function SettingsView() {
     const router = useRouter();
     const { settings, toggleSetting } = useSettings();
-    const { user, updateUser, isAdmin } = useAuth();
+    const { user, updateProfile, isAdmin } = useAuth();
 
-    const displayName = user ? (user.name || user.email || user.username || '') : '';
+    const serverName = user ? (user.name || user.email || user.username || '') : '';
+    const [displayNameValue, setDisplayNameValue] = useState(serverName);
+    const [displayNameDirty, setDisplayNameDirty] = useState(false);
+    const [displayNameSaving, setDisplayNameSaving] = useState(false);
+    const [displayNameMessage, setDisplayNameMessage] = useState<'success' | 'error' | null>(null);
+
+    useEffect(() => {
+        setDisplayNameValue(serverName);
+    }, [serverName]);
 
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        updateUser({ name: e.target.value });
+        const value = e.target.value;
+        setDisplayNameValue(value);
+        setDisplayNameDirty(value !== serverName);
+        setDisplayNameMessage(null);
+    };
+
+    const handleSaveDisplayName = async () => {
+        if (!displayNameDirty) return;
+        setDisplayNameSaving(true);
+        setDisplayNameMessage(null);
+        try {
+            const result = await updateProfile({ name: displayNameValue });
+            if (result.success) {
+                setDisplayNameDirty(false);
+                setDisplayNameMessage('success');
+            } else {
+                setDisplayNameMessage('error');
+            }
+        } catch {
+            setDisplayNameMessage('error');
+        } finally {
+            setDisplayNameSaving(false);
+        }
     };
 
     const handleSubscription = () => {
@@ -71,18 +101,36 @@ export default function SettingsView() {
             <div className="settings-wrapper">
                 <div className="group-title">GENERAL</div>
 
-                <div className="settings-item">
+                <div className="settings-item settings-item-display-name">
                     <div className="settings-item-content">
                         <div className="item-title">Display Name</div>
                         <div className="item-desc">How you appear in the app</div>
                     </div>
-                    <input
-                        type="text"
-                        className="input-clean"
-                        value={displayName}
-                        onChange={handleNameChange}
-                        aria-label="Display name"
-                    />
+                    <div className="settings-display-name-row">
+                        <input
+                            type="text"
+                            className="input-clean"
+                            value={displayNameValue}
+                            onChange={handleNameChange}
+                            aria-label="Display name"
+                        />
+                        {displayNameDirty && (
+                            <button
+                                type="button"
+                                className="btn-resume btn-resume-primary settings-display-name-save"
+                                onClick={handleSaveDisplayName}
+                                disabled={displayNameSaving}
+                            >
+                                {displayNameSaving ? 'Saving…' : 'Save'}
+                            </button>
+                        )}
+                    </div>
+                    {displayNameMessage === 'success' && (
+                        <p className="settings-display-name-feedback success" role="status">Display name saved.</p>
+                    )}
+                    {displayNameMessage === 'error' && (
+                        <p className="settings-display-name-feedback error" role="alert">Failed to save. Try again.</p>
+                    )}
                 </div>
 
                 {renderSwitch('Light Mode', 'Switch between dark and light themes', 'theme')}

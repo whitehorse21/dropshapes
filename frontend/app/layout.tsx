@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
-import Link from "next/link";
 import "./globals.css";
 import { Providers } from "./components/Providers";
 import AuthWrapper from "./components/AuthWrapper";
@@ -43,9 +42,6 @@ export default function RootLayout({
       <body className={`${plusJakartaSans.variable} antialiased`}>
         <style dangerouslySetInnerHTML={{ __html: criticalCSS }} />
         <Providers>
-          <Link href="/" className="logo-link" prefetch={false}>
-            <img src="/logo.png" alt="Dropshapes Logo" className="app-logo" />
-          </Link>
           <AuthWrapper>{children}</AuthWrapper>
         </Providers>
       </body>

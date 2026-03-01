@@ -23,6 +23,7 @@ const formatSubscriptionEndpoint = (endpoint) => {
 const endpoints = {
   login: "auth/login", // Remove trailing slash for auth endpoints
   register: "auth/register", // Remove trailing slash for auth endpoints
+  authUpdateMe: "auth/me", // PATCH – update current user profile
   contactUs: formatEndpoint("contact"),
   logout: "auth/logout", // Remove trailing slash for auth endpoints
   courseUnits: formatEndpoint('course-units'),  

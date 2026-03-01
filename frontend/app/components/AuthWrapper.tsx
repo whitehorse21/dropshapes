@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { ChatProvider } from "../context/ChatContext";
 import LoginView from "./views/LoginView";
@@ -14,6 +16,8 @@ export default function AuthWrapper({
   children: React.ReactNode;
 }) {
   const { user, isLoading } = useAuth();
+  const pathname = usePathname();
+  const isAdminRoute = pathname?.startsWith("/admin-dashboard");
 
   if (isLoading) {
     return (
@@ -26,7 +30,7 @@ export default function AuthWrapper({
         <div className="app-loading-backdrop" aria-hidden="true" />
         <div className="app-loading-card">
           <div className="app-loading-logo">
-            <img src="/logo.png" alt="" width={72} height={72} />
+            <img src="/logo.png" alt="" width={80} height={80} />
           </div>
           <h1 className="app-loading-title">Dropshapes</h1>
           <p className="app-loading-subtitle">Preparing your workspace…</p>
@@ -44,8 +48,41 @@ export default function AuthWrapper({
     return <LoginView />;
   }
 
+  /* Admin dashboard: full-screen, no app chrome (dock, profile, sidebar, logo) */
+  if (isAdminRoute) {
+    return (
+      <ChatProvider>
+        {children}
+        <div
+          id="toast"
+          className="toast"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <div className="toast-icon" aria-hidden="true">
+            <svg
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <span id="toast-msg">Ready</span>
+        </div>
+      </ChatProvider>
+    );
+  }
+
   return (
     <ChatProvider>
+      <Link href="/" className="logo-link" prefetch={false}>
+        <img src="/logo.png" alt="Dropshapes Logo" className="app-logo" />
+      </Link>
       <a className="skip-link" href="#mainContent">
         Skip to main content
       </a>

@@ -19,6 +19,10 @@ class User(Base):
     
     # Resume builder specific fields
     profile_image = Column(String, nullable=True)
+    phone = Column(String, nullable=True)
+    bio = Column(Text, nullable=True)
+    location = Column(String, nullable=True)
+    website = Column(String, nullable=True)
     ai_credits = Column(Integer, default=0)  # Credits for AI features (bonus/trial credits)
     subscription_tokens_used = Column(Integer, default=0)  # Tokens used from subscription plan
     has_used_free_limits = Column(Boolean, default=False)  # Track if user has used free limits before subscribing

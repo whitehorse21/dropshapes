@@ -5,7 +5,9 @@ import { NextRequest, NextResponse } from 'next/server';
  * Uses multiple strategies to avoid redirect loops
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.www.dropshapes.com/api/';
+// Ensure trailing slash so path concatenation doesn't produce e.g. .../apiadmin/users
+const rawBase = process.env.NEXT_PUBLIC_API_URL || 'https://api.www.dropshapes.com/api/';
+const API_BASE_URL = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
 export async function GET(request, context) {
   const params = await context.params;
@@ -78,8 +80,7 @@ async function handleProxyRequest(request, params, method) {
 }
 
 async function handleSubscriptionEndpoint(request, path, method) {
-  // For subscription endpoints, use the exact path without modifications
-  // to prevent redirect loops caused by trailing slash handling
+  // API_BASE_URL has trailing slash so path joins correctly
   let apiUrl = `${API_BASE_URL}${path}`;
   
   // Don't add trailing slashes for subscription endpoints
@@ -147,7 +148,7 @@ async function handleSubscriptionEndpoint(request, path, method) {
 }
 
 async function handleStandardEndpoint(request, path, method) {
-  // Construct the full API URL with smart trailing slash handling
+  // API_BASE_URL is normalized to end with / so we get .../api/admin/users not .../apiadmin/users
   let apiUrl = `${API_BASE_URL}${path}`;
   
   // Don't add trailing slash for auth, admin, or paths that break on redirect (backend expects no slash)

@@ -211,8 +211,9 @@ class TaskManagementService:
                     "category": task.category,
                     "tags": task.tags or [],
                     "ai_generated": task.ai_generated,
-                    "created_at": task.created_at.isoformat(),
-                    "updated_at": task.updated_at.isoformat()
+                    "created_at": task.created_at.isoformat() if task.created_at else None,
+                    "updated_at": task.updated_at.isoformat() if task.updated_at else None,
+                    "completed_at": task.completed_at.isoformat() if task.completed_at else None,
                 }
                 task_list.append(task_dict)
             

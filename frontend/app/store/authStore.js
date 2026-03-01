@@ -209,9 +209,22 @@ const useAuthStore = create(persist((set, get) => ({
 
       // Clear any errors
       clearError: () => set({ error: null }),
-      
-      // Update user data in store
-      updateUser: (userData) => set({ user: { ...get().user, ...userData } })
+
+      // Update user data in store only (no API call)
+      updateUser: (userData) => set({ user: { ...get().user, ...userData } }),
+
+      // Update profile on server then sync store with returned user
+      updateProfile: async (userData) => {
+        try {
+          const response = await axiosInstance.patch(endpoints.authUpdateMe, userData);
+          const updatedUser = response.data;
+          set({ user: { ...get().user, ...updatedUser } });
+          return { success: true, user: updatedUser };
+        } catch (error) {
+          const message = error.response?.data?.detail || error.response?.data?.message || 'Failed to update profile';
+          return { success: false, error: typeof message === 'string' ? message : JSON.stringify(message) };
+        }
+      }
     }),
     {
       name: 'auth-storage', // name of the item in localStorage

@@ -40,6 +40,7 @@ interface AuthContextType {
   isAdmin: () => boolean;
   getUserRole: () => 'admin' | 'user' | null;
   updateUser: (userData: Partial<AuthUser>) => void;
+  updateProfile: (userData: Partial<AuthUser>) => Promise<{ success: boolean; user?: AuthUser; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -59,6 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAdmin,
     getUserRole,
     updateUser,
+    updateProfile,
     initializeAuth,
   } = useAuthStore();
 
@@ -80,6 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAdmin,
     getUserRole,
     updateUser,
+    updateProfile,
   };
 
   return (

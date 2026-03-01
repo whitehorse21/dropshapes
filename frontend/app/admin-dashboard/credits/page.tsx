@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search, Gift, Wallet, ChevronLeft, ChevronRight, CheckCircle2, AlertCircle } from "lucide-react";
 import apiService from "@/app/apimodule/utils/apiService";
 import endpoints from "@/app/apimodule/endpoints/ApiEndpoints";
 import { useAdminUsers } from "@/app/hooks/useAdminUsers";
@@ -71,98 +71,98 @@ export default function AdminCreditsPage() {
   };
 
   return (
-    <div className="admin-content">
+    <div className="admin-content admin-credits-page">
       <div className="admin-page-header">
         <h1>Credits</h1>
-        <p>Give trial credits or add to admin</p>
+        <p>Give trial credits to users or add credits to your admin account</p>
       </div>
 
-      {message ? (
+      {message && (
         <div
-          className={
-            message.type === "success"
-              ? "admin-credits-message rounded-lg px-5 py-3 text-sm bg-(--safe-green)/20 text-(--safe-green)"
-              : "admin-credits-message rounded-lg px-5 py-3 text-sm bg-(--danger-red)/20 text-(--danger-red)"
-          }
+          className={`admin-credits-message admin-credits-message-${message.type}`}
+          role="status"
         >
-          {message.text}
+          {message.type === "success" ? (
+            <CheckCircle2 className="admin-credits-message-icon" aria-hidden />
+          ) : (
+            <AlertCircle className="admin-credits-message-icon" aria-hidden />
+          )}
+          <span>{message.text}</span>
         </div>
-      ) : null}
+      )}
 
-      <div className="group-title">GIVE TRIAL CREDITS</div>
-      <div className="admin-card admin-credits-admin-card">
-        <h2 className="font-semibold text-(--text-primary) m-0">
-          Give trial credits to user
-        </h2>
-        <div className="admin-credits-section-body p-5 sm:p-6">
-          <label
-            htmlFor="admin-credits-search-users"
-            className="admin-credits-label block text-sm font-medium text-(--text-secondary) mb-4"
-          >
-            Search by name or email
-          </label>
-          <input
-            id="admin-credits-search-users"
-            type="search"
-            placeholder="Search users..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="input-clean admin-credits-input w-full max-w-md text-left"
-            aria-label="Search users"
-          />
-          <div className="admin-table-wrap mt-6">
-            <table className="w-full text-left text-sm">
+      <section className="admin-credits-card" aria-labelledby="credits-trial-heading">
+        <div className="admin-credits-card-header">
+          <Gift className="admin-credits-card-icon" aria-hidden />
+          <h2 id="credits-trial-heading" className="admin-credits-card-title">
+            Give trial credits
+          </h2>
+          <p className="admin-credits-card-desc">Search users and grant trial credits to their account.</p>
+        </div>
+        <div className="admin-credits-card-body">
+          <div className="admin-credits-search-wrap">
+            <Search className="admin-credits-search-icon" aria-hidden />
+            <input
+              id="admin-credits-search-users"
+              type="search"
+              placeholder="Search by name or email"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="admin-credits-search-input"
+              aria-label="Search users"
+            />
+          </div>
+          <div className="admin-credits-table-wrap">
+            <table className="admin-credits-table">
               <thead>
-                <tr className="border-b border-(--border) bg-(--surface)">
-                  <th className="px-5 py-4 font-medium text-(--text-primary)">
-                    Name
-                  </th>
-                  <th className="px-5 py-4 font-medium text-(--text-primary)">
-                    Email
-                  </th>
-                  <th className="px-5 py-4 font-medium text-(--text-primary)">
-                    Action
-                  </th>
+                <tr>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {usersLoading ? (
                   <tr>
-                    <td colSpan={3} className="px-5 py-8 text-center">
-                      <Loader2 className="mx-auto h-6 w-6 animate-spin text-(--accent)" />
+                    <td colSpan={3} className="admin-credits-loading-cell">
+                      <Loader2 className="admin-credits-spinner" aria-hidden />
+                      <span>Loading users…</span>
                     </td>
                   </tr>
                 ) : users.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={3}
-                      className="text-center text-(--text-secondary) admin-table-empty-cell"
-                    >
-                      No users found
+                    <td colSpan={3} className="admin-credits-empty-cell">
+                      <p>No users found</p>
+                      <span>Try a different search</span>
                     </td>
                   </tr>
                 ) : (
                   users.map((user) => (
-                    <tr
-                      key={user.id}
-                      className="border-b border-(--border) hover:bg-(--card-hover)"
-                    >
-                      <td className="px-5 py-4 font-medium text-(--text-primary)">
-                        {user.name || "—"}
+                    <tr key={user.id}>
+                      <td>
+                        <div className="admin-credits-user-cell">
+                          <div className="admin-credits-avatar">
+                            {(user.name || user.email || "?").charAt(0).toUpperCase()}
+                          </div>
+                          <span className="admin-credits-user-name">{user.name || "—"}</span>
+                        </div>
                       </td>
-                      <td className="px-5 py-4 text-(--text-secondary)">
-                        {user.email}
-                      </td>
-                      <td className="px-5 py-4">
+                      <td className="admin-credits-email">{user.email}</td>
+                      <td>
                         <button
                           type="button"
                           onClick={() => giveTrialToUser(user.email)}
                           disabled={addingForEmail === user.email}
-                          className="btn-action w-auto px-3 py-1.5 text-sm bg-(--accent) border-(--accent) text-white disabled:opacity-50"
+                          className="admin-credits-btn admin-credits-btn-primary"
                         >
-                          {addingForEmail === user.email
-                            ? "Adding…"
-                            : "Give trial credits"}
+                          {addingForEmail === user.email ? (
+                            <>
+                              <Loader2 className="admin-credits-btn-spinner" aria-hidden />
+                              Adding…
+                            </>
+                          ) : (
+                            "Give trial credits"
+                          )}
                         </button>
                       </td>
                     </tr>
@@ -172,62 +172,77 @@ export default function AdminCreditsPage() {
             </table>
           </div>
           {totalPages > 1 && (
-            <div className="mt-4 flex justify-center gap-2">
-              <button
-                type="button"
-                disabled={page <= 1}
-                onClick={() => setPage((p) => p - 1)}
-                className="btn-action w-auto px-3 py-1.5 text-sm disabled:opacity-50"
-              >
-                Prev
-              </button>
-              <span className="px-3 py-1.5 text-sm text-(--text-secondary)">
+            <nav className="admin-credits-pagination" aria-label="Users pagination">
+              <span className="admin-credits-pagination-info">
                 Page {page} of {totalPages}
               </span>
-              <button
-                type="button"
-                disabled={page >= totalPages}
-                onClick={() => setPage((p) => p + 1)}
-                className="btn-action w-auto px-3 py-1.5 text-sm disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
+              <div className="admin-credits-pagination-buttons">
+                <button
+                  type="button"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className="admin-credits-pagination-btn"
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft className="admin-credits-pagination-icon" aria-hidden />
+                  Prev
+                </button>
+                <button
+                  type="button"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  className="admin-credits-pagination-btn"
+                  aria-label="Next page"
+                >
+                  Next
+                  <ChevronRight className="admin-credits-pagination-icon" aria-hidden />
+                </button>
+              </div>
+            </nav>
           )}
         </div>
-      </div>
+      </section>
 
-      <div className="group-title">ADMIN CREDITS</div>
-      <div className="admin-card admin-credits-admin-card">
-        <h2 className="font-semibold text-(--text-primary) m-0 mb-5">
-          Add credits to admin account
-        </h2>
-        <label
-          className="admin-credits-label block text-sm font-medium text-(--text-secondary) mb-4"
-          htmlFor="admin-credits-amount"
-        >
-          Number of credits
-        </label>
-        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-4 sm:gap-5">
-          <input
-            id="admin-credits-amount"
-            type="number"
-            min={1}
-            value={adminCreditAmount}
-            onChange={(e) => setAdminCreditAmount(Number(e.target.value) || 0)}
-            className="input-clean w-full sm:w-36 text-left"
-            aria-label="Credit amount"
-          />
-          <button
-            type="button"
-            onClick={addCreditsToAdmin}
-            disabled={addingAdmin}
-            className="btn-action w-full sm:w-auto px-4 py-2 bg-(--accent) border-(--accent) text-white disabled:opacity-50"
-          >
-            {addingAdmin ? "Adding…" : "Add credits (admin)"}
-          </button>
+      <section className="admin-credits-card" aria-labelledby="credits-admin-heading">
+        <div className="admin-credits-card-header">
+          <Wallet className="admin-credits-card-icon" aria-hidden />
+          <h2 id="credits-admin-heading" className="admin-credits-card-title">
+            Add credits to admin
+          </h2>
+          <p className="admin-credits-card-desc">Add AI credits to your own admin account.</p>
         </div>
-      </div>
+        <div className="admin-credits-card-body admin-credits-admin-section">
+          <label htmlFor="admin-credits-amount" className="admin-credits-field-label">
+            Number of credits
+          </label>
+          <div className="admin-credits-admin-row">
+            <input
+              id="admin-credits-amount"
+              type="number"
+              min={1}
+              value={adminCreditAmount}
+              onChange={(e) => setAdminCreditAmount(Math.max(0, Number(e.target.value) || 0))}
+              className="admin-credits-amount-input"
+              aria-label="Credit amount"
+            />
+            <button
+              type="button"
+              onClick={addCreditsToAdmin}
+              disabled={addingAdmin || adminCreditAmount < 1}
+              className="admin-credits-btn admin-credits-btn-primary admin-credits-btn-add"
+            >
+              {addingAdmin ? (
+                <>
+                  <Loader2 className="admin-credits-btn-spinner" aria-hidden />
+                  Adding…
+                </>
+              ) : (
+                "Add credits"
+              )}
+            </button>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Search, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 import useAdminUsers from '@/app/hooks/useAdminUsers';
 
 export default function AdminUsersPage() {
@@ -19,100 +19,119 @@ export default function AdminUsersPage() {
     <div className="admin-content">
       <div className="admin-page-header">
         <h1>Users</h1>
-        <p>Search & manage accounts</p>
+        <p>Search and manage user accounts</p>
       </div>
 
-      <input
-        type="search"
-        placeholder="Search users..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="input-clean w-full max-w-md text-left"
-        aria-label="Search users"
-      />
-
-      <div className="admin-table-wrap">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-[var(--border)] bg-[var(--surface)]">
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)]">Name</th>
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)]">Email</th>
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)] text-center">AI Requests</th>
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)]">Last Active</th>
-              <th className="px-4 py-3 font-medium text-[var(--text-primary)]">Joined</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={5} className="px-4 py-12 text-center">
-                  <Loader2 className="mx-auto h-8 w-8 animate-spin text-[var(--accent)]" aria-hidden />
-                </td>
-              </tr>
-            ) : users.length > 0 ? (
-              users.map((user) => (
-                <tr
-                  key={user.id}
-                  className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--card-hover)]"
-                >
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      {user.profile_picture ? (
-                        <img
-                          src={user.profile_picture}
-                          alt=""
-                          className="h-8 w-8 rounded-full object-cover border border-[var(--border)]"
-                        />
-                      ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent-light)] text-sm font-semibold text-[var(--accent)]">
-                          {(user.name || user.email || '?').charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                      <span className="font-medium text-[var(--text-primary)]">{user.name || '—'}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-[var(--text-secondary)]">{user.email}</td>
-                  <td className="px-4 py-3 text-center font-medium text-[var(--accent)]">
-                    {user.ai_requests}
-                  </td>
-                  <td className="px-4 py-3 text-[var(--text-secondary)]">{user.last_active ?? '—'}</td>
-                  <td className="px-4 py-3 text-[var(--text-secondary)]">{user.created_at}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-[var(--text-secondary)]">
-                  No users found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {totalPages > 1 && (
-        <div className="flex flex-wrap items-center justify-center gap-2 py-2">
-          <button
-            type="button"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="btn-action w-auto px-4 py-2 disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="px-4 py-2 text-sm text-[var(--text-secondary)]">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            type="button"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page >= totalPages}
-            className="btn-action w-auto px-4 py-2 disabled:opacity-50"
-          >
-            Next
-          </button>
+      <section className="admin-section-card" aria-labelledby="admin-users-heading">
+        <div className="admin-section-card-header">
+          <Users className="admin-section-card-icon" aria-hidden />
+          <h2 id="admin-users-heading" className="admin-section-card-title">
+            All users
+          </h2>
+          <p className="admin-section-card-desc">
+            Search by name or email and view activity.
+          </p>
         </div>
-      )}
+        <div className="admin-section-card-body">
+          <div className="admin-section-search-wrap">
+            <Search className="admin-section-search-icon" aria-hidden />
+            <input
+              type="search"
+              placeholder="Search by name or email"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="admin-section-search-input"
+              aria-label="Search users"
+            />
+          </div>
+          <div className="admin-section-table-wrap">
+            <table className="admin-section-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th className="text-center">AI Requests</th>
+                  <th>Last Active</th>
+                  <th>Joined</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={5} className="admin-section-loading-cell">
+                      <Loader2 className="admin-section-spinner" aria-hidden />
+                      <span>Loading users…</span>
+                    </td>
+                  </tr>
+                ) : users.length > 0 ? (
+                  users.map((user) => (
+                    <tr key={user.id}>
+                      <td>
+                        <div className="admin-credits-user-cell">
+                          {user.profile_picture ? (
+                            <img
+                              src={user.profile_picture}
+                              alt=""
+                              className="admin-credits-avatar-img"
+                            />
+                          ) : (
+                            <div className="admin-credits-avatar">
+                              {(user.name || user.email || '?').charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <span className="admin-credits-user-name">{user.name || '—'}</span>
+                        </div>
+                      </td>
+                      <td className="admin-credits-email">{user.email}</td>
+                      <td className="text-center font-medium" style={{ color: 'var(--accent)' }}>
+                        {user.ai_requests}
+                      </td>
+                      <td className="admin-credits-email">{user.last_active ?? '—'}</td>
+                      <td className="admin-credits-email">{user.created_at}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="admin-section-empty-cell">
+                      <p>No users found</p>
+                      <span>Try a different search</span>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          {totalPages > 1 && (
+            <nav className="admin-section-pagination" aria-label="Users pagination">
+              <span className="admin-section-pagination-info">
+                Page {page} of {totalPages}
+              </span>
+              <div className="admin-section-pagination-buttons">
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="admin-section-pagination-btn"
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft className="admin-section-pagination-icon" aria-hidden />
+                  Prev
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  className="admin-section-pagination-btn"
+                  aria-label="Next page"
+                >
+                  Next
+                  <ChevronRight className="admin-section-pagination-icon" aria-hidden />
+                </button>
+              </div>
+            </nav>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
