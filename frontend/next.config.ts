@@ -2,8 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  // Disable Turbopack to use Webpack instead (more stable)
-  // Turbopack can cause compatibility issues with some packages
+  // Next.js 16 uses Turbopack by default for builds; empty config silences
+  // "webpack config but no turbopack config" error. Use `next build --webpack` to use webpack.
+  turbopack: {},
 
   // React 19 + Next.js 16 compatibility settings
   reactStrictMode: true,
