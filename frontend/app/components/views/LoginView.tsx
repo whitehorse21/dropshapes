@@ -1,16 +1,41 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { signIn } from "next-auth/react";
+import toast from "react-hot-toast";
+
+const NEXT_AUTH_ERROR_MESSAGES: Record<string, string> = {
+  OAuthSignin: "Error starting sign in. Please try again.",
+  OAuthCallback: "Error during sign in. Please try again.",
+  OAuthCreateAccount: "Could not create account. Please try again.",
+  EmailCreateAccount: "Could not create account. Please try again.",
+  Callback: "Error in sign in callback. Please try again.",
+  OAuthAccountNotLinked: "This email is already used with another sign-in method. Sign in with the method you used originally.",
+  EmailSignin: "Check your email for the sign-in link.",
+  CredentialsSignin: "Invalid email or password.",
+  SessionRequired: "Please sign in to continue.",
+  Default: "Something went wrong. Please try again.",
+};
 
 export default function LoginView() {
   const { login, register, isLoading, error, clearError } = useAuth();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
+
+  useEffect(() => {
+    const err = searchParams.get("error");
+    if (err) {
+      const message = NEXT_AUTH_ERROR_MESSAGES[err] || NEXT_AUTH_ERROR_MESSAGES.Default;
+      toast.error(message);
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, [searchParams]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,10 +44,12 @@ export default function LoginView() {
     if (activeTab === "signin") {
       const result = await login({ email, password });
       if (!result.success) {
+        toast.error(result.error || "Sign in failed. Please check your email and password.");
         return;
       }
     } else {
       if (!agreeToTerms) {
+        toast.error("Please agree to the terms of service.");
         return;
       }
       const result = await register({
@@ -33,13 +60,23 @@ export default function LoginView() {
         agree_to_terms: agreeToTerms,
       });
       if (!result.success) {
+        toast.error(result.error || "Registration failed. Please try again.");
         return;
       }
     }
   };
 
-  const handleSocialLogin = (provider: string) => {
-    signIn(provider, { callbackUrl: "/" });
+  const handleSocialLogin = async (provider: string) => {
+    clearError();
+    const result = await signIn(provider, { callbackUrl: "/", redirect: false });
+    if (result?.error) {
+      const message = NEXT_AUTH_ERROR_MESSAGES[result.error] || result.error || "Sign in was cancelled or failed.";
+      toast.error(message);
+      return;
+    }
+    if (result?.url) {
+      window.location.href = result.url;
+    }
   };
 
   const loading = isLoading;

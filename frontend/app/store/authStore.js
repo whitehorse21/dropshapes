@@ -5,6 +5,16 @@ import endpoints from '../apimodule/endpoints/ApiEndpoints';
 
 const TOKEN_EXPIRY_TIME = 24 * 60 * 60 * 1000; // 1 day in milliseconds
 
+function toErrorMessage(detail, fallback) {
+  if (detail == null) return fallback;
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) {
+    const parts = detail.map((d) => (d?.msg != null ? d.msg : String(d)));
+    return parts.length ? parts.join('. ') : fallback;
+  }
+  return fallback;
+}
+
 const useAuthStore = create(persist((set, get) => ({
       user: null,
       token: null,
@@ -80,7 +90,10 @@ const useAuthStore = create(persist((set, get) => ({
           
           return { success: true, user };
         } catch (error) {
-          const errorMessage = error.response?.data?.detail || 'Registration failed';
+          const errorMessage = toErrorMessage(
+            error.response?.data?.detail,
+            error.response?.data?.message || 'Registration failed'
+          );
           set({
             loading: false,
             error: errorMessage
@@ -135,9 +148,10 @@ const useAuthStore = create(persist((set, get) => ({
           
           if (error.response) {
             // Server responded with error status
-            errorMessage = error.response?.data?.detail || 
-                          error.response?.data?.message || 
-                          `Server error: ${error.response.status}`;
+            errorMessage = toErrorMessage(
+              error.response?.data?.detail,
+              error.response?.data?.message || `Server error: ${error.response.status}`
+            );
           } else if (error.request) {
             // Network error - no response received
             if (error.code === 'ENOTFOUND' || error.code === 'EAI_AGAIN') {
