@@ -6,12 +6,13 @@ import { useRouter } from 'next/navigation';
 
 interface GameLayoutProps {
     title: string;
-    icon: React.ReactNode;
+    subtitle?: string;
+    icon?: React.ReactNode;
     children: React.ReactNode;
     instructions?: string;
 }
 
-export default function GameLayout({ title, icon, children, instructions }: GameLayoutProps) {
+export default function GameLayout({ title, subtitle, icon, children, instructions }: GameLayoutProps) {
     const router = useRouter();
 
     return (
@@ -37,8 +38,15 @@ export default function GameLayout({ title, icon, children, instructions }: Game
                     <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
                 <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                    <div className="text-blue-400 p-1.5 bg-blue-500/10 rounded-lg border border-white/5 shrink-0">{icon}</div>
-                    <h1 className="text-base sm:text-lg md:text-xl font-bold tracking-tight truncate text-white">{title}</h1>
+                    {icon != null && (
+                        <div className="text-blue-400 p-1.5 bg-blue-500/10 rounded-lg border border-white/5 shrink-0">{icon}</div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                        <h1 className="text-base sm:text-lg md:text-xl font-bold tracking-tight truncate text-white">{title}</h1>
+                        {subtitle != null && subtitle !== '' && (
+                            <p className="text-xs sm:text-sm text-slate-400 truncate">{subtitle}</p>
+                        )}
+                    </div>
                 </div>
             </header>
 

@@ -141,7 +141,7 @@ export const initializeCoverLetterData = () => {
 };
 
 // Defaults and buildCoverLetterPayload (for cover letter create/update API)
-const defaultProfile = {
+export const defaultProfile = {
   full_name: '',
   email: '',
   phone_number: '',
@@ -149,15 +149,15 @@ const defaultProfile = {
   linkedin_profile: '',
   portfolio_website: '',
 };
-const defaultRecipient = {
+export const defaultRecipient = {
   company_name: '',
   hiring_manager_name: '',
   job_title: '',
   company_address: '',
 };
-const defaultIntroduction = { greet_text: 'Dear Hiring Manager,', intro_para: '' };
-const defaultClosing = { text: 'Sincerely,' };
-const defaultCoverStyle = { font: 'Arial', color: '#000000' };
+export const defaultIntroduction = { greet_text: 'Dear Hiring Manager,', intro_para: '' };
+export const defaultClosing = { text: 'Sincerely,' };
+export const defaultCoverStyle = { font: 'Arial', color: '#000000' };
 
 export const defaultCoverLetterData = {
   cover_letter_title: '',
