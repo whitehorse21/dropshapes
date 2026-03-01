@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
@@ -45,7 +45,24 @@ export default function AuthWrapper({
   }
 
   if (!user) {
-    return <LoginView />;
+    return (
+      <Suspense
+        fallback={
+          <div className="app-loading-screen" role="status" aria-label="Loading">
+            <div className="app-loading-backdrop" aria-hidden="true" />
+            <div className="app-loading-card">
+              <div className="app-loading-spinner" aria-hidden="true">
+                <span className="app-loading-spinner-dot" />
+                <span className="app-loading-spinner-dot" />
+                <span className="app-loading-spinner-dot" />
+              </div>
+            </div>
+          </div>
+        }
+      >
+        <LoginView />
+      </Suspense>
+    );
   }
 
   /* Admin dashboard: full-screen, no app chrome (dock, profile, sidebar, logo) */

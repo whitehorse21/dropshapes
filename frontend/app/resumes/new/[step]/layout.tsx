@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -19,7 +19,7 @@ import endpoints from "@/app/apimodule/endpoints/ApiEndpoints";
 import { toast } from "react-hot-toast";
 import ResumeBodyContent from "@/app/resumes/components/ResumeBodyContent";
 
-export default function ResumeStepLayout({
+function ResumeStepLayoutInner({
   children,
 }: {
   children: React.ReactNode;
@@ -391,5 +391,23 @@ export default function ResumeStepLayout({
         </div>
       )}
     </div>
+  );
+}
+
+export default function ResumeStepLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <div className="view-section active-view" style={{ padding: "24px" }}>
+          <p>Loading...</p>
+        </div>
+      }
+    >
+      <ResumeStepLayoutInner>{children}</ResumeStepLayoutInner>
+    </Suspense>
   );
 }
