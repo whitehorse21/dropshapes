@@ -1,8 +1,21 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import { Providers } from "./components/Providers";
-import AuthWrapper from "./components/AuthWrapper";
+
+const ClientLayout = dynamic(() => import("./components/ClientLayout"), {
+  loading: () => (
+    <div
+      className="min-h-screen flex items-center justify-center bg-[#05070a] antialiased"
+      style={{ padding: "2rem" }}
+      role="status"
+      aria-label="Loading"
+    >
+      <div className="text-white/80">Loading…</div>
+    </div>
+  ),
+  ssr: true,
+});
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -41,9 +54,7 @@ export default function RootLayout({
     <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className={`${plusJakartaSans.variable} antialiased`}>
         <style dangerouslySetInnerHTML={{ __html: criticalCSS }} />
-        <Providers>
-          <AuthWrapper>{children}</AuthWrapper>
-        </Providers>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
