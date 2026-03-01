@@ -137,13 +137,13 @@ export function clearCoverLetterData(): void {
 }
 
 /** Ensure object has only string values for API (Pydantic expects no null/undefined). */
-function toPlainStrings<T extends Record<string, unknown>>(
+function toPlainStrings<T extends object>(
   defaults: T,
   source: Partial<T> | null | undefined
 ): Record<keyof T, string> {
   const out = {} as Record<keyof T, string>;
   for (const key of Object.keys(defaults) as (keyof T)[]) {
-    const v = source?.[key] ?? defaults[key];
+    const v = source?.[key] ?? (defaults as Record<keyof T, unknown>)[key];
     out[key] = typeof v === 'string' ? v : '';
   }
   return out;

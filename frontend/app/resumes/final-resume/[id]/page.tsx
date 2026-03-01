@@ -29,7 +29,6 @@ function FinalResumeContent() {
   const handlePrint = useReactToPrint({
     contentRef: resumeContentRef,
     documentTitle: resumeData?.resume_title || 'Resume',
-    copyStyles: true,
     pageStyle: `
       @page { size: A4; margin: 12mm; }
       * { box-sizing: border-box; }

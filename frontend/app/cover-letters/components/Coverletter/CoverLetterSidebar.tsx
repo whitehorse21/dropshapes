@@ -3,7 +3,6 @@
 import { LayoutTemplate, Type, List } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
-// @ts-expect-error JS module
 import { coverLetterTemplateMetaData } from '@/app/utils/coverLetterTemplatesMetadata';
 
 interface CoverLetterSidebarProps {

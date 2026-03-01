@@ -1,11 +1,23 @@
 'use client';
 
 import React from 'react';
-import type { CoverLetterData } from '@/app/utils/coverLetterService';
+import type {
+  CoverLetterData,
+  CoverLetterProfile,
+  CoverLetterRecipient,
+  CoverLetterIntroduction,
+  CoverLetterClosing,
+} from '@/app/utils/coverLetterService';
 import { getCoverLetterFontFamily } from '@/app/utils/coverLetterFont';
 
 export default function TemplateModernMinimal({ data }: { data: CoverLetterData }) {
-  const { profile = {}, recipient = {}, introduction = {}, body = '', closing = {} } = data;
+  const {
+    profile = {} as CoverLetterProfile,
+    recipient = {} as CoverLetterRecipient,
+    introduction = {} as CoverLetterIntroduction,
+    body = '',
+    closing = {} as CoverLetterClosing,
+  } = data;
   const font = getCoverLetterFontFamily(data.cover_style?.font);
 
   return (

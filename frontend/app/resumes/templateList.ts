@@ -3,7 +3,6 @@
  * Uses templates from frontend/app/templates/index.js (single source of truth).
  */
 
-// @ts-expect-error JS module - templates have id, name, category, thumbnail, layout, hasSidebar
 import { templates } from '@/app/templates';
 
 export interface ResumeTemplateOption {

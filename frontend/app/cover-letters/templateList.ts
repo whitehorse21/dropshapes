@@ -3,7 +3,6 @@
  * Uses coverLetterTemplatesMetadata.js as source.
  */
 
-// @ts-expect-error JS module
 import { coverLetterTemplateMetaData } from '@/app/utils/coverLetterTemplatesMetadata';
 
 function slugify(name: string): string {

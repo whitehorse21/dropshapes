@@ -94,7 +94,6 @@ function PreviewContent() {
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: data?.cover_letter_title || 'Cover Letter',
-    copyStyles: true,
     pageStyle: `
       @page { size: A4; margin: 18mm; background: white; }
       html, body {

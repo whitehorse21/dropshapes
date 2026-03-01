@@ -37,7 +37,6 @@ interface TemplateDef {
   style?: TemplateStyle;
 }
 
-// @ts-expect-error - templates is JS module with full layout/style
 import { templates } from '@/app/templates';
 
 const templatesList: TemplateDef[] = templates as TemplateDef[];
@@ -83,7 +82,7 @@ const TemplateResumeRenderer = React.forwardRef<HTMLDivElement, {
 
   const renderSections = (sectionKeys: string[]) =>
     sectionKeys.map((key) => {
-      const node = renderSection(key, resumeData as Parameters<typeof renderSection>[1], style, layout);
+      const node = renderSection(key, resumeData as unknown as Parameters<typeof renderSection>[1], style, layout);
       if (!node) return null;
       return <React.Fragment key={key}>{node}</React.Fragment>;
     });
