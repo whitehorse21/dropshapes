@@ -1868,6 +1868,104 @@ body.high-contrast-mode .header-minimal h1 {
   height: 100%;
 }
 
+/* Colored quick-action icons (no background, icon color only) */
+.tool-pill-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  min-height: 26px;
+  flex-shrink: 0;
+}
+
+.tool-pill-icon-wrap svg {
+  width: 22px;
+  height: 22px;
+}
+
+.tool-pill-icon--blue {
+  color: #2563eb;
+}
+
+body.dark-mode .tool-pill-icon--blue,
+body:not(.light-mode) .tool-pill-icon--blue {
+  color: #60a5fa;
+}
+
+.tool-pill-icon--purple {
+  color: #7c3aed;
+}
+
+body.dark-mode .tool-pill-icon--purple,
+body:not(.light-mode) .tool-pill-icon--purple {
+  color: #a78bfa;
+}
+
+.tool-pill-icon--green {
+  color: #16a34a;
+}
+
+body.dark-mode .tool-pill-icon--green,
+body:not(.light-mode) .tool-pill-icon--green {
+  color: #4ade80;
+}
+
+.tool-pill-icon--amber {
+  color: #d97706;
+}
+
+body.dark-mode .tool-pill-icon--amber,
+body:not(.light-mode) .tool-pill-icon--amber {
+  color: #fbbf24;
+}
+
+.tool-pill-icon--teal {
+  color: #0d9488;
+}
+
+body.dark-mode .tool-pill-icon--teal,
+body:not(.light-mode) .tool-pill-icon--teal {
+  color: #2dd4bf;
+}
+
+.tool-pill-icon--indigo {
+  color: #4f46e5;
+}
+
+body.dark-mode .tool-pill-icon--indigo,
+body:not(.light-mode) .tool-pill-icon--indigo {
+  color: #818cf8;
+}
+
+.tool-pill-icon--pink {
+  color: #db2777;
+}
+
+body.dark-mode .tool-pill-icon--pink,
+body:not(.light-mode) .tool-pill-icon--pink {
+  color: #f472b6;
+}
+
+.tool-pill-icon--cyan {
+  color: #0891b2;
+}
+
+body.dark-mode .tool-pill-icon--cyan,
+body:not(.light-mode) .tool-pill-icon--cyan {
+  color: #22d3ee;
+}
+
+.tool-pill-icon--yellow {
+  color: #ca8a04;
+}
+
+body.dark-mode .tool-pill-icon--yellow,
+body:not(.light-mode) .tool-pill-icon--yellow {
+  color: #facc15;
+}
+
 .privacy-shield {
   position: absolute;
   bottom: 24px;
