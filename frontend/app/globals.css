@@ -1966,12 +1966,13 @@ body.high-contrast-mode .header-minimal h1 {
   border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   cursor: pointer;
   color: var(--text-primary);
   font-weight: 600;
   transition: var(--transition);
-  text-align: left;
+  text-align: center;
   outline: none;
   font-size: clamp(0.875rem, 2vw, 1rem);
   flex: 0 1 auto;
@@ -6700,6 +6701,48 @@ body.high-contrast-mode .admin-page-header h1 {
   box-sizing: border-box;
 }
 
+/* Job page – tabbed Resumes & Cover Letters (title/subtitle from active tab content) */
+.job-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 12px;
+  border-bottom: 2px solid var(--glass-border);
+}
+.job-tab {
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+.job-tab:hover {
+  color: var(--text-primary);
+}
+.job-tab--active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.job-tab-panels {
+  min-height: 200px;
+}
+.job-tab-panel {
+  outline: none;
+}
+.job-tab-panel[hidden] {
+  display: none;
+}
+.job-tab-panel > section {
+  margin-top: 0;
+  padding-top: 0;
+  min-height: 0;
+  padding-bottom: 24px;
+}
+
 .tool-page-nav {
   display: flex;
   flex-wrap: wrap;
@@ -8648,6 +8691,103 @@ body:not(.light-mode)
   text-align: center;
   box-sizing: border-box;
 }
+/* Resume preview page (standalone /resumes/preview/[id]) */
+.resume-preview-page {
+  width: 100%;
+  max-width: min(1024px, 100%);
+  margin: 0 auto;
+  padding: 0 16px 32px;
+  box-sizing: border-box;
+}
+.resume-preview-page .resume-preview-header {
+  padding: 16px 0 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--glass-border);
+}
+.resume-preview-page .resume-preview-header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px 24px;
+  max-width: 100%;
+}
+.resume-preview-page .resume-preview-back {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  min-height: 40px;
+  font-size: 0.9rem;
+}
+.resume-preview-page .resume-preview-title {
+  margin: 0;
+  font-size: clamp(1.25rem, 3.5vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: var(--text-primary);
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.resume-preview-page .resume-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  flex-shrink: 0;
+}
+.resume-preview-page .resume-preview-actions-export {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+}
+.resume-preview-page .resume-preview-actions-export .btn-resume-sm {
+  padding: 8px 14px;
+  min-height: 36px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.resume-preview-page .resume-preview-actions .btn-resume-primary {
+  padding: 10px 18px;
+  min-height: 40px;
+  font-size: 0.9rem;
+}
+@media (max-width: 768px) {
+  .resume-preview-page .resume-preview-header-inner {
+    gap: 14px 16px;
+  }
+  .resume-preview-page .resume-preview-title {
+    flex-basis: 100%;
+    order: -1;
+    white-space: normal;
+    padding-right: 0;
+  }
+  .resume-preview-page .resume-preview-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .resume-preview-page .resume-preview-actions-export {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+@media (max-width: 480px) {
+  .resume-preview-page .resume-preview-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .resume-preview-page .resume-preview-actions-export {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
 .resume-preview-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -8659,6 +8799,63 @@ body:not(.light-mode)
 .resume-preview-toolbar .btn-resume {
   min-width: 0;
 }
+
+/* Final resume page toolbar – grouped layout (Back | Export | Edit | Save draft) */
+#view-final-resume .resume-final-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  margin-bottom: 24px;
+  justify-content: flex-start;
+}
+#view-final-resume .resume-final-back {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  min-height: 40px;
+  font-size: 0.9rem;
+}
+#view-final-resume .resume-final-actions-export {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+}
+#view-final-resume .resume-final-actions-export .btn-resume-sm {
+  padding: 8px 14px;
+  min-height: 36px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+#view-final-resume .resume-final-toolbar .btn-resume-primary {
+  padding: 10px 18px;
+  min-height: 40px;
+  font-size: 0.9rem;
+  margin-left: auto;
+}
+@media (max-width: 768px) {
+  #view-final-resume .resume-final-toolbar {
+    gap: 10px 12px;
+  }
+  #view-final-resume .resume-final-toolbar .btn-resume-primary {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+@media (max-width: 480px) {
+  #view-final-resume .resume-final-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  #view-final-resume .resume-final-actions-export {
+    justify-content: center;
+  }
+}
+
 .resume-preview-body {
   width: 100%;
   min-width: 0;
@@ -10048,74 +10245,101 @@ body.light-mode .cover-letter-preview-root {
 .cover-letter-preview-header-bar {
   background: var(--card-bg);
   border-bottom: 1px solid var(--glass-border);
+  padding: 16px 0 20px;
 }
 .cover-letter-preview-header-inner {
-  max-width: 80rem;
+  max-width: min(1024px, 100%);
   margin: 0 auto;
-  padding: 0 1rem;
-}
-@media (min-width: 640px) {
-  .cover-letter-preview-header-inner {
-    padding: 0 1.5rem;
-  }
-}
-@media (min-width: 1024px) {
-  .cover-letter-preview-header-inner {
-    padding: 0 2rem;
-  }
-}
-.cover-letter-preview-header-inner {
+  padding: 0 16px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 4rem;
   flex-wrap: wrap;
-  gap: 12px;
-}
-.cover-letter-preview-header-left {
-  display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 20px 24px;
+}
+.cover-letter-preview-back {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  min-height: 40px;
+  font-size: 0.9rem;
+}
+.cover-letter-preview-title-wrap {
+  flex: 1 1 0;
   min-width: 0;
-}
-.cover-letter-preview-back-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
-  color: var(--text-secondary);
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition:
-    background 0.2s,
-    color 0.2s;
-}
-.cover-letter-preview-back-btn:hover {
-  color: var(--text-primary);
-  background: var(--card-hover);
 }
 .cover-letter-preview-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-primary);
   margin: 0;
-  line-height: 1.3;
+  font-size: clamp(1.25rem, 3.5vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .cover-letter-preview-template-label {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   color: var(--text-secondary);
-  margin: 4px 0 0 0;
+  margin: 2px 0 0 0;
+  line-height: 1.3;
 }
-.cover-letter-preview-header-actions {
+.cover-letter-preview-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 10px 16px;
   flex-shrink: 0;
 }
-.cover-letter-preview-header-actions .btn-resume {
-  min-width: 0;
+.cover-letter-preview-actions-export {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+}
+.cover-letter-preview-actions-export .btn-resume-sm {
+  padding: 8px 14px;
+  min-height: 36px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.cover-letter-preview-actions .btn-resume-primary {
+  padding: 10px 18px;
+  min-height: 40px;
+  font-size: 0.9rem;
+}
+@media (max-width: 768px) {
+  .cover-letter-preview-header-inner {
+    gap: 14px 16px;
+  }
+  .cover-letter-preview-title-wrap {
+    flex-basis: 100%;
+    order: -1;
+  }
+  .cover-letter-preview-title {
+    white-space: normal;
+  }
+  .cover-letter-preview-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .cover-letter-preview-actions-export {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+@media (max-width: 480px) {
+  .cover-letter-preview-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .cover-letter-preview-actions-export {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 }
 .cover-letter-preview-content {
   width: 100%;
@@ -10919,6 +11143,7 @@ body:not(.light-mode) .cover-letter-preview-document {
 /* Tool pages: same title/subtitle style as home, at top; refined cards and buttons */
 #view-resumes .header-minimal,
 #view-cover-letters .header-minimal,
+#view-job .header-minimal,
 #view-cover-letter-preview .header-minimal,
 #view-cover-letter-edit .header-minimal,
 #view-interview-training .header-minimal,
@@ -10948,6 +11173,7 @@ body:not(.light-mode) .cover-letter-preview-document {
 
 #view-resumes .header-minimal h1,
 #view-cover-letters .header-minimal h1,
+#view-job .header-minimal h1,
 #view-cover-letter-preview .header-minimal h1,
 #view-cover-letter-edit .header-minimal h1,
 #view-interview-training .header-minimal h1,
@@ -10993,6 +11219,7 @@ body:not(.light-mode) .cover-letter-preview-document {
 
 #view-resumes .header-minimal p,
 #view-cover-letters .header-minimal p,
+#view-job .header-minimal p,
 #view-cover-letter-preview .header-minimal p,
 #view-cover-letter-edit .header-minimal p,
 #view-interview-training .header-minimal p,
@@ -11025,6 +11252,7 @@ body:not(.light-mode) .cover-letter-preview-document {
 
 body.light-mode #view-resumes .header-minimal h1,
 body.light-mode #view-cover-letters .header-minimal h1,
+body.light-mode #view-job .header-minimal h1,
 body.light-mode #view-cover-letter-preview .header-minimal h1,
 body.light-mode #view-cover-letter-edit .header-minimal h1,
 body.light-mode #view-interview-training .header-minimal h1,
@@ -11055,6 +11283,7 @@ body.light-mode .games-dashboard .header-minimal h1 {
 
 body.high-contrast-mode #view-resumes .header-minimal h1,
 body.high-contrast-mode #view-cover-letters .header-minimal h1,
+body.high-contrast-mode #view-job .header-minimal h1,
 body.high-contrast-mode #view-cover-letter-preview .header-minimal h1,
 body.high-contrast-mode #view-cover-letter-edit .header-minimal h1,
 body.high-contrast-mode #view-interview-training .header-minimal h1,

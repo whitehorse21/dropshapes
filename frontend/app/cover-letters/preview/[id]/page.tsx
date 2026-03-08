@@ -6,8 +6,11 @@ import { useReactToPrint } from "react-to-print";
 import axiosInstance from "@/app/apimodule/axiosConfig/Axios";
 import ApiEndpoints from "@/app/apimodule/endpoints/ApiEndpoints";
 import { toast } from "react-hot-toast";
-import { ArrowLeft } from "lucide-react";
 import CoverLetterTemplateRenderer from "@/app/cover-letters/templates";
+import {
+  exportAsHtml,
+  exportCoverLetterAsDocxFromHtml,
+} from "@/app/utils/exportUtils";
 import type { CoverLetterData } from "@/app/utils/coverLetterService";
 import {
   defaultProfile,
@@ -71,6 +74,7 @@ function PreviewContent() {
   const id = (params?.id as string)?.trim?.() || "";
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<CoverLetterData | null>(null);
+  const [exportingDocx, setExportingDocx] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -144,6 +148,16 @@ function PreviewContent() {
     `,
   });
 
+  useEffect(() => {
+    if (!data) return;
+    const prev = document.title;
+    const title = data.cover_letter_title || "Cover Letter";
+    document.title = `${title} | Cover Letters`;
+    return () => {
+      document.title = prev;
+    };
+  }, [data]);
+
   if (loading) {
     return (
       <div className="cover-letter-preview-root cover-letter-preview-loading-wrap">
@@ -178,47 +192,76 @@ function PreviewContent() {
 
   const title = data.cover_letter_title || "Cover Letter";
 
+  const handleExportHtml = () => {
+    const name = (title || "CoverLetter").replace(/[^\w\s-]/g, "").trim() || "CoverLetter";
+    exportAsHtml(printRef.current, `${name}.html`, "cover-letter");
+  };
+
+  const handleExportDocx = async () => {
+    setExportingDocx(true);
+    try {
+      const name = (title || "CoverLetter").replace(/[^\w\s-]/g, "").trim() || "CoverLetter";
+      await exportCoverLetterAsDocxFromHtml(printRef.current, name, "cover-letter");
+      toast.success("Cover letter downloaded as DOCX");
+    } catch {
+      toast.error("Failed to export DOCX");
+    } finally {
+      setExportingDocx(false);
+    }
+  };
+
   return (
     <div className="cover-letter-preview-root">
-      {/* Header – same structure as old_frontend preview [id]/page.jsx */}
-      <div className="cover-letter-preview-header-bar print:hidden">
+      <header className="cover-letter-preview-header-bar print:hidden">
         <div className="cover-letter-preview-header-inner">
-          <div className="cover-letter-preview-header-left">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="cover-letter-preview-back-btn"
-              aria-label="Back"
-            >
-              <ArrowLeft className="h-5 w-5" aria-hidden />
-            </button>
-            <div>
-              <h1 className="cover-letter-preview-title">{title}</h1>
-              <p className="cover-letter-preview-template-label">
-                Template: {data.cover_template_category || "—"}
-              </p>
-            </div>
+          <button
+            type="button"
+            className="btn-resume cover-letter-preview-back"
+            onClick={() => router.push("/cover-letters")}
+            aria-label="Back to cover letters"
+          >
+            ← Back
+          </button>
+          <div className="cover-letter-preview-title-wrap">
+            <h1 className="cover-letter-preview-title">{title}</h1>
+            <p className="cover-letter-preview-template-label">
+              Template: {data.cover_template_category || "—"}
+            </p>
           </div>
-          <div className="cover-letter-preview-header-actions">
+          <div className="cover-letter-preview-actions">
+            <div className="cover-letter-preview-actions-export" role="group" aria-label="Export options">
+              <button
+                type="button"
+                className="btn-resume btn-resume-sm"
+                onClick={handlePrint}
+                aria-label="Print or save as PDF"
+              >
+                Print / PDF
+              </button>
+              <button type="button" className="btn-resume btn-resume-sm" onClick={handleExportHtml}>
+                HTML
+              </button>
+              <button
+                type="button"
+                className="btn-resume btn-resume-sm"
+                onClick={handleExportDocx}
+                disabled={exportingDocx}
+              >
+                {exportingDocx ? "…" : "DOCX"}
+              </button>
+            </div>
             <button
               type="button"
-              className="btn-resume"
+              className="btn-resume btn-resume-primary"
               onClick={() => router.push(`/cover-letters/edit/${id}`)}
+              aria-label="Edit this cover letter"
             >
-              Edit
-            </button>
-            <button
-              type="button"
-              className="btn-resume btn-resume-primary ml-2"
-              onClick={handlePrint}
-            >
-              Print / Save as PDF
+              Edit cover letter
             </button>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Preview content – same as old: rounded-lg overflow-hidden wrapping renderer */}
       <div className="cover-letter-preview-content">
         <div
           className="cover-letter-preview-document cover-letter-print-area rounded-lg overflow-hidden"

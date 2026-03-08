@@ -360,3 +360,5 @@ function ResumesPageContent() {
 export default function ResumesPage() {
   return <ResumesPageContent />;
 }
+
+export { ResumesPageContent };

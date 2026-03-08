@@ -172,3 +172,5 @@ function CoverLettersContent() {
 export default function CoverLettersPage() {
   return <CoverLettersContent />;
 }
+
+export { CoverLettersContent };

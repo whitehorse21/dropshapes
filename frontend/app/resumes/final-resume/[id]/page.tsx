@@ -15,6 +15,10 @@ import {
 } from "@/app/utils/resumeService";
 import { toast } from "react-hot-toast";
 import ResumeBodyContent from "@/app/resumes/components/ResumeBodyContent";
+import {
+  exportAsHtml,
+  exportResumeAsDocxFromHtml,
+} from "@/app/utils/exportUtils";
 
 function FinalResumeContent() {
   const params = useParams();
@@ -24,6 +28,7 @@ function FinalResumeContent() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
+  const [exporting, setExporting] = useState<"html" | "docx" | null>(null);
   const resumeContentRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = useReactToPrint({
@@ -119,6 +124,26 @@ function FinalResumeContent() {
     updateResumeData(next);
   };
 
+  const handleExportHtml = () => {
+    const el = resumeContentRef.current;
+    const name = (resumeData?.resume_title || "Resume").replace(/[^\w\s-]/g, "").trim() || "Resume";
+    exportAsHtml(el, `${name}.html`, "resume");
+  };
+
+  const handleExportDocx = async () => {
+    if (!resumeData) return;
+    setExporting("docx");
+    try {
+      const name = (resumeData.resume_title || "Resume").replace(/[^\w\s-]/g, "").trim() || "Resume";
+      await exportResumeAsDocxFromHtml(resumeContentRef.current, name, "resume");
+      toast.success("Resume downloaded as DOCX");
+    } catch {
+      toast.error("Failed to export DOCX");
+    } finally {
+      setExporting(null);
+    }
+  };
+
   if (loading || !resumeData) {
     return (
       <section
@@ -178,15 +203,42 @@ function FinalResumeContent() {
           <p>View, edit, and export your resume</p>
         </header>
 
-        <div className="resume-preview-toolbar resume-no-print">
+        <div className="resume-preview-toolbar resume-no-print resume-final-toolbar">
           <button
             type="button"
-            className="btn-resume"
+            className="btn-resume resume-final-back"
             onClick={() => router.push("/resumes")}
             aria-label="Back to resumes list"
           >
-            ← Back to list
+            ← Back
           </button>
+          <div className="resume-final-actions-export" role="group" aria-label="Export options">
+            <button
+              type="button"
+              className="btn-resume btn-resume-sm"
+              onClick={handlePrint}
+              aria-label="Print or save as PDF"
+            >
+              Print / PDF
+            </button>
+            <button
+              type="button"
+              className="btn-resume btn-resume-sm"
+              onClick={handleExportHtml}
+              aria-label="Save as HTML"
+            >
+              HTML
+            </button>
+            <button
+              type="button"
+              className="btn-resume btn-resume-sm"
+              onClick={handleExportDocx}
+              disabled={exporting === "docx"}
+              aria-label="Save as DOCX"
+            >
+              {exporting === "docx" ? "…" : "DOCX"}
+            </button>
+          </div>
           <button
             type="button"
             className="btn-resume"
@@ -197,20 +249,12 @@ function FinalResumeContent() {
           </button>
           <button
             type="button"
-            className="btn-resume mx-2"
-            onClick={handlePrint}
-            aria-label="Print or save as PDF"
-          >
-            Print / Save as PDF
-          </button>
-          <button
-            type="button"
             className="btn-resume btn-resume-primary"
             onClick={handleSaveDraft}
             disabled={saving}
             aria-label={saving ? "Saving" : "Save draft"}
           >
-            {saving ? "Saving..." : "Save draft"}
+            {saving ? "Saving…" : "Save draft"}
           </button>
         </div>
 
