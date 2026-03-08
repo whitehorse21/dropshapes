@@ -1,11 +1,14 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import axiosInstance from '@/app/apimodule/axiosConfig/Axios';
-import endpoints from '@/app/apimodule/endpoints/ApiEndpoints';
-import { apiResumeToFormData, type ResumeData } from '@/app/utils/resumeService';
-import ResumeBodyContent from '@/app/resumes/components/ResumeBodyContent';
+import React, { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import axiosInstance from "@/app/apimodule/axiosConfig/Axios";
+import endpoints from "@/app/apimodule/endpoints/ApiEndpoints";
+import {
+  apiResumeToFormData,
+  type ResumeData,
+} from "@/app/utils/resumeService";
+import ResumeBodyContent from "@/app/resumes/components/ResumeBodyContent";
 
 function PreviewContent() {
   const params = useParams();
@@ -20,7 +23,7 @@ function PreviewContent() {
         const res = await axiosInstance.get(`${endpoints.resumes}/${id}`);
         setResumeData(apiResumeToFormData(res.data as Record<string, unknown>));
       } catch {
-        router.push('/resumes');
+        router.push("/resumes");
       } finally {
         setLoading(false);
       }
@@ -28,7 +31,7 @@ function PreviewContent() {
   }, [id, router]);
 
   const handlePrint = () => {
-    if (typeof window !== 'undefined') window.print();
+    if (typeof window !== "undefined") window.print();
   };
 
   if (loading || !resumeData) {
@@ -42,7 +45,7 @@ function PreviewContent() {
     );
   }
 
-  const pageTitle = resumeData.resume_title || 'Resume Preview';
+  const pageTitle = resumeData.resume_title || "Resume Preview";
 
   return (
     <section className="view-section active-view" aria-label="Resume preview">
@@ -54,7 +57,7 @@ function PreviewContent() {
               <button
                 type="button"
                 className="btn-resume"
-                onClick={() => router.push('/resumes')}
+                onClick={() => router.push("/resumes")}
                 aria-label="Back to resumes list"
               >
                 ← Back to list
@@ -71,7 +74,7 @@ function PreviewContent() {
               </button>
               <button
                 type="button"
-                className="btn-resume btn-resume-primary"
+                className="btn-resume btn-resume-primary ml-2"
                 onClick={() => router.push(`/resumes/final-resume/${id}`)}
                 aria-label="Edit this resume"
               >

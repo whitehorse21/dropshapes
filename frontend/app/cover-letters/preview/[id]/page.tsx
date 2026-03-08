@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { useReactToPrint } from 'react-to-print';
-import axiosInstance from '@/app/apimodule/axiosConfig/Axios';
-import ApiEndpoints from '@/app/apimodule/endpoints/ApiEndpoints';
-import { toast } from 'react-hot-toast';
-import { ArrowLeft } from 'lucide-react';
-import CoverLetterTemplateRenderer from '@/app/cover-letters/templates';
-import type { CoverLetterData } from '@/app/utils/coverLetterService';
+import React, { useState, useEffect, useRef } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { useReactToPrint } from "react-to-print";
+import axiosInstance from "@/app/apimodule/axiosConfig/Axios";
+import ApiEndpoints from "@/app/apimodule/endpoints/ApiEndpoints";
+import { toast } from "react-hot-toast";
+import { ArrowLeft } from "lucide-react";
+import CoverLetterTemplateRenderer from "@/app/cover-letters/templates";
+import type { CoverLetterData } from "@/app/utils/coverLetterService";
 import {
   defaultProfile,
   defaultRecipient,
   defaultIntroduction,
   defaultClosing,
   defaultCoverStyle,
-} from '@/app/utils/coverLetterService';
+} from "@/app/utils/coverLetterService";
 
 interface ApiCoverLetter {
   id: number;
@@ -35,29 +35,40 @@ function mapApiToCoverLetterData(raw: ApiCoverLetter): CoverLetterData {
   const r = raw.recipient || {};
   return {
     id: raw.id,
-    cover_letter_title: raw.cover_letter_title ?? '',
-    cover_letter_type: raw.cover_letter_type ?? 'professional',
-    cover_template_category: raw.cover_template_category ?? 'professional',
+    cover_letter_title: raw.cover_letter_title ?? "",
+    cover_letter_type: raw.cover_letter_type ?? "professional",
+    cover_template_category: raw.cover_template_category ?? "professional",
     profile: {
       ...defaultProfile,
       ...raw.profile,
-      full_name: (p.full_name ?? p.fullname ?? p.fullName ?? defaultProfile.full_name) as string,
-      phone_number: (p.phone_number ?? p.phone ?? defaultProfile.phone_number) as string,
-      linkedin_profile: (p.linkedin_profile ?? p.linkedin ?? defaultProfile.linkedin_profile) as string,
-      portfolio_website: (p.portfolio_website ?? p.website ?? defaultProfile.portfolio_website) as string,
+      full_name: (p.full_name ??
+        p.fullname ??
+        p.fullName ??
+        defaultProfile.full_name) as string,
+      phone_number: (p.phone_number ??
+        p.phone ??
+        defaultProfile.phone_number) as string,
+      linkedin_profile: (p.linkedin_profile ??
+        p.linkedin ??
+        defaultProfile.linkedin_profile) as string,
+      portfolio_website: (p.portfolio_website ??
+        p.website ??
+        defaultProfile.portfolio_website) as string,
     },
     recipient: { ...defaultRecipient, ...raw.recipient },
     introduction: { ...defaultIntroduction, ...raw.introduction },
-    body: raw.body ?? '',
+    body: raw.body ?? "",
     closing: { ...defaultClosing, ...raw.closing },
-    cover_style: raw.cover_style ? { ...defaultCoverStyle, ...raw.cover_style } : defaultCoverStyle,
+    cover_style: raw.cover_style
+      ? { ...defaultCoverStyle, ...raw.cover_style }
+      : defaultCoverStyle,
   };
 }
 
 function PreviewContent() {
   const router = useRouter();
   const params = useParams();
-  const id = (params?.id as string)?.trim?.() || '';
+  const id = (params?.id as string)?.trim?.() || "";
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<CoverLetterData | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
@@ -71,7 +82,7 @@ function PreviewContent() {
     let cancelled = false;
     setLoading(true);
     setData(null);
-    const baseUrl = ApiEndpoints.coverLetters.replace(/\/$/, '');
+    const baseUrl = ApiEndpoints.coverLetters.replace(/\/$/, "");
     axiosInstance
       .get<{ success: boolean; data: ApiCoverLetter }>(`${baseUrl}/${id}/`)
       .then((res) => {
@@ -81,19 +92,21 @@ function PreviewContent() {
       })
       .catch(() => {
         if (!cancelled) {
-          toast.error('Failed to load cover letter');
+          toast.error("Failed to load cover letter");
           setData(null);
         }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
-    documentTitle: data?.cover_letter_title || 'Cover Letter',
+    documentTitle: data?.cover_letter_title || "Cover Letter",
     pageStyle: `
       @page { size: A4; margin: 18mm; background: white; }
       html, body {
@@ -136,7 +149,9 @@ function PreviewContent() {
       <div className="cover-letter-preview-root cover-letter-preview-loading-wrap">
         <div className="cover-letter-preview-loading">
           <div className="cover-letter-preview-spinner" aria-hidden="true" />
-          <p className="cover-letter-preview-loading-text">Loading cover letter…</p>
+          <p className="cover-letter-preview-loading-text">
+            Loading cover letter…
+          </p>
         </div>
       </div>
     );
@@ -146,10 +161,12 @@ function PreviewContent() {
     return (
       <div className="cover-letter-preview-root cover-letter-preview-empty-wrap">
         <div className="cover-letter-preview-empty">
-          <h2 className="cover-letter-preview-empty-title">Cover Letter Not Found</h2>
+          <h2 className="cover-letter-preview-empty-title">
+            Cover Letter Not Found
+          </h2>
           <button
             type="button"
-            onClick={() => router.push('/cover-letters')}
+            onClick={() => router.push("/cover-letters")}
             className="btn-resume btn-resume-primary"
           >
             Back to Cover Letters
@@ -159,7 +176,7 @@ function PreviewContent() {
     );
   }
 
-  const title = data.cover_letter_title || 'Cover Letter';
+  const title = data.cover_letter_title || "Cover Letter";
 
   return (
     <div className="cover-letter-preview-root">
@@ -178,7 +195,7 @@ function PreviewContent() {
             <div>
               <h1 className="cover-letter-preview-title">{title}</h1>
               <p className="cover-letter-preview-template-label">
-                Template: {data.cover_template_category || '—'}
+                Template: {data.cover_template_category || "—"}
               </p>
             </div>
           </div>
@@ -190,7 +207,11 @@ function PreviewContent() {
             >
               Edit
             </button>
-            <button type="button" className="btn-resume btn-resume-primary" onClick={handlePrint}>
+            <button
+              type="button"
+              className="btn-resume btn-resume-primary ml-2"
+              onClick={handlePrint}
+            >
               Print / Save as PDF
             </button>
           </div>

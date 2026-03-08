@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useReactToPrint } from 'react-to-print';
-import axiosInstance from '@/app/apimodule/axiosConfig/Axios';
-import endpoints from '@/app/apimodule/endpoints/ApiEndpoints';
+import React, { useState, useEffect, useRef } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useReactToPrint } from "react-to-print";
+import axiosInstance from "@/app/apimodule/axiosConfig/Axios";
+import endpoints from "@/app/apimodule/endpoints/ApiEndpoints";
 import {
   getResumeFromLocalDB,
   saveResumeData,
@@ -12,9 +12,9 @@ import {
   apiResumeToFormData,
   buildResumeCreatePayload,
   type ResumeData,
-} from '@/app/utils/resumeService';
-import { toast } from 'react-hot-toast';
-import ResumeBodyContent from '@/app/resumes/components/ResumeBodyContent';
+} from "@/app/utils/resumeService";
+import { toast } from "react-hot-toast";
+import ResumeBodyContent from "@/app/resumes/components/ResumeBodyContent";
 
 function FinalResumeContent() {
   const params = useParams();
@@ -28,7 +28,7 @@ function FinalResumeContent() {
 
   const handlePrint = useReactToPrint({
     contentRef: resumeContentRef,
-    documentTitle: resumeData?.resume_title || 'Resume',
+    documentTitle: resumeData?.resume_title || "Resume",
     pageStyle: `
       @page { size: A4; margin: 12mm; }
       * { box-sizing: border-box; }
@@ -70,13 +70,15 @@ function FinalResumeContent() {
     (async () => {
       try {
         const res = await axiosInstance.get(`${endpoints.resumes}/${id}`);
-        const normalized = apiResumeToFormData(res.data as Record<string, unknown>);
+        const normalized = apiResumeToFormData(
+          res.data as Record<string, unknown>,
+        );
         setResumeData(normalized);
         saveResumeData(normalized);
         updateResumeData(normalized);
       } catch {
-        toast.error('Resume not found');
-        router.push('/resumes');
+        toast.error("Resume not found");
+        router.push("/resumes");
       } finally {
         setLoading(false);
       }
@@ -89,12 +91,15 @@ function FinalResumeContent() {
     setSaving(true);
     try {
       const payload = buildResumeCreatePayload(data);
-      await axiosInstance.put(`${endpoints.resumes}/${data.id}/update-structured`, payload);
-      toast.success('Draft saved');
+      await axiosInstance.put(
+        `${endpoints.resumes}/${data.id}/update-structured`,
+        payload,
+      );
+      toast.success("Draft saved");
       setResumeData(data);
     } catch (e: unknown) {
       const err = e as { response?: { data?: { detail?: string } } };
-      toast.error(err.response?.data?.detail || 'Failed to save');
+      toast.error(err.response?.data?.detail || "Failed to save");
     } finally {
       setSaving(false);
     }
@@ -123,7 +128,10 @@ function FinalResumeContent() {
       >
         <div className="resumes-page-content">
           <div className="resume-preview-loading">
-            <div className="resume-preview-loading-spinner" aria-hidden="true" />
+            <div
+              className="resume-preview-loading-spinner"
+              aria-hidden="true"
+            />
             <p className="resume-preview-loading-text">Loading resume...</p>
           </div>
         </div>
@@ -132,7 +140,8 @@ function FinalResumeContent() {
   }
 
   const pi = resumeData.personalInfo || {};
-  const name = [pi.firstName, pi.lastName].filter(Boolean).join(' ') || 'Resume';
+  const name =
+    [pi.firstName, pi.lastName].filter(Boolean).join(" ") || "Resume";
   const displayTitle = resumeData.resume_title || name;
 
   return (
@@ -150,7 +159,7 @@ function FinalResumeContent() {
               value={resumeData.resume_title}
               onChange={(e) => handleTitleChange(e.target.value)}
               onBlur={() => setEditingTitle(false)}
-              onKeyDown={(e) => e.key === 'Enter' && setEditingTitle(false)}
+              onKeyDown={(e) => e.key === "Enter" && setEditingTitle(false)}
               autoFocus
               aria-label="Resume title"
             />
@@ -161,7 +170,7 @@ function FinalResumeContent() {
               title="Click to edit title"
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && setEditingTitle(true)}
+              onKeyDown={(e) => e.key === "Enter" && setEditingTitle(true)}
             >
               {displayTitle}
             </h1>
@@ -173,7 +182,7 @@ function FinalResumeContent() {
           <button
             type="button"
             className="btn-resume"
-            onClick={() => router.push('/resumes')}
+            onClick={() => router.push("/resumes")}
             aria-label="Back to resumes list"
           >
             ← Back to list
@@ -188,7 +197,7 @@ function FinalResumeContent() {
           </button>
           <button
             type="button"
-            className="btn-resume"
+            className="btn-resume mx-2"
             onClick={handlePrint}
             aria-label="Print or save as PDF"
           >
@@ -199,9 +208,9 @@ function FinalResumeContent() {
             className="btn-resume btn-resume-primary"
             onClick={handleSaveDraft}
             disabled={saving}
-            aria-label={saving ? 'Saving' : 'Save draft'}
+            aria-label={saving ? "Saving" : "Save draft"}
           >
-            {saving ? 'Saving...' : 'Save draft'}
+            {saving ? "Saving..." : "Save draft"}
           </button>
         </div>
 
