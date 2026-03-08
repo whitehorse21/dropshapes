@@ -42,12 +42,21 @@ export default function HomeView() {
   const chunksRef = useRef<Blob[]>([]);
   /** When true, skip typing animation (e.g. after loading a conversation from history). Cleared when user sends a new message. */
   const [justLoadedConversation, setJustLoadedConversation] = useState(false);
+  const prevLoadingRef = useRef(loading);
 
   const isChatActive = messages.length > 0;
 
+  /* When a conversation finishes loading (loading true → false), show all messages without typing animation. */
   useEffect(() => {
-    if (loading) setJustLoadedConversation(true);
+    if (prevLoadingRef.current && !loading) setJustLoadedConversation(true);
+    prevLoadingRef.current = loading;
   }, [loading]);
+
+  /* When mounting with messages already loaded (e.g. navigated from another page after selecting a conversation), skip typing. */
+  useEffect(() => {
+    if (!loading && messages.length > 0) setJustLoadedConversation(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) fetchConversations();
@@ -67,17 +76,17 @@ export default function HomeView() {
   // Fetch playable URL for stored voice messages (S3 presigned via backend)
   useEffect(() => {
     messages.forEach((msg) => {
-      if (
-        msg.id != null &&
-        msg.audioUrl &&
-        !playbackRequestedRef.current.has(msg.id)
-      ) {
+      const hasAudio =
+        (msg.audioUrl != null && String(msg.audioUrl).trim() !== "") ||
+        (msg.sender === "user" && msg.text === "Voice message");
+      if (msg.id != null && hasAudio && !playbackRequestedRef.current.has(msg.id)) {
         playbackRequestedRef.current.add(msg.id);
         axiosInstance
           .get(ApiEndpoints.chatMessageAudioUrl(msg.id))
-          .then((res) =>
-            setPlaybackUrls((prev) => ({ ...prev, [msg.id!]: res.data.url })),
-          )
+          .then((res) => {
+            const url = res.data?.url ?? res.data?.URL;
+            if (url) setPlaybackUrls((prev) => ({ ...prev, [msg.id!]: url }));
+          })
           .catch(() => {});
       }
     });
@@ -212,27 +221,22 @@ export default function HomeView() {
           });
           const data = res.data;
           setConversationIdAfterSend(data.conversation_id);
+          const um = data.user_message ?? data.userMessage;
+          const am = data.assistant_message ?? data.assistantMessage;
+          const userContent = um?.content?.trim?.();
           const userMsg = {
-            id: data.user_message?.id,
+            id: um?.id,
             text: "Voice message",
             sender: "user" as const,
-            timestamp: new Date(
-              data.user_message?.created_at || Date.now(),
-            ).getTime(),
-            audioUrl:
-              data.user_message?.content &&
-              data.user_message.content.startsWith("http")
-                ? data.user_message.content
-                : audioUrl,
+            timestamp: new Date((um?.created_at ?? um?.createdAt) || Date.now()).getTime(),
+            audioUrl: typeof userContent === "string" && userContent.length > 0 ? userContent : audioUrl,
           };
           const assistantMsg = {
-            id: data.assistant_message?.id,
-            text: data.assistant_message?.content ?? "",
+            id: am?.id,
+            text: am?.content ?? "",
             sender: "ai" as const,
-            timestamp: new Date(
-              data.assistant_message?.created_at || Date.now(),
-            ).getTime(),
-            audioUrl: data.assistant_message?.audio_url ?? undefined,
+            timestamp: new Date((am?.created_at ?? am?.createdAt) || Date.now()).getTime(),
+            audioUrl: (am?.audio_url ?? am?.audioUrl) ?? undefined,
           };
           // Replace optimistic placeholder with real user message (with audio) + assistant reply
           setMessages((prev) => {
@@ -362,20 +366,29 @@ export default function HomeView() {
             messages.map((msg, idx) => (
               <div key={idx} className={`chat-message ${msg.sender}`}>
                 <div className="chat-bubble">
-                  {msg.audioUrl && (
-                    <audio
-                      className="chat-audio-player"
-                      src={
-                        msg.id && playbackUrls[msg.id]
-                          ? playbackUrls[msg.id]
-                          : msg.audioUrl
-                      }
-                      controls
-                      preload="metadata"
-                      aria-label="Play voice message"
-                    />
-                  )}
-                  {msg.text && (
+                  {((msg.audioUrl != null && msg.audioUrl !== "") ||
+                    (msg.sender === "user" && msg.text === "Voice message")) &&
+                    (() => {
+                      const src = (msg.id != null && playbackUrls[msg.id]) || msg.audioUrl || "";
+                      return src ? (
+                        <audio
+                          className="chat-audio-player"
+                          src={src}
+                          controls
+                          preload="metadata"
+                          aria-label="Play voice message"
+                        />
+                      ) : (
+                        <span className="chat-audio-loading" aria-live="polite">
+                          Loading audio…
+                        </span>
+                      );
+                    })()}
+                  {msg.text != null &&
+                    msg.text !== "" &&
+                    (msg.sender !== "user" ||
+                      (!msg.audioUrl && msg.text !== "Voice message")) &&
+                    (msg.sender !== "ai" || !msg.audioUrl) && (
                     <ChatMessageContent
                       text={msg.text}
                       sender={msg.sender}
@@ -421,93 +434,82 @@ export default function HomeView() {
         </div>
 
         <div className="input-zone">
-          {}
-          <div className="chat-controls">
-            {(currentConversationId != null || isChatActive) && (
-              <button
-                type="button"
-                className="control-btn"
-                onClick={handleNewChat}
-                title="New Chat"
-                aria-label="Start new chat"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
+          <div className="chat-toolbar">
+            <div className="chat-controls">
+              {(currentConversationId != null || isChatActive) && (
+                <button
+                  type="button"
+                  className="control-btn"
+                  onClick={handleNewChat}
+                  title="New Chat"
+                  aria-label="Start new chat"
                 >
-                  <path d="M12 4v16m8-8H4" />
-                </svg>
-              </button>
-            )}
-            {isChatActive && (
-              <button
-                type="button"
-                className="control-btn"
-                onClick={clearChat}
-                title="Clear Chat"
-                aria-label="Clear current chat"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
+                  <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
+              )}
+              {isChatActive && (
+                <button
+                  type="button"
+                  className="control-btn"
+                  onClick={clearChat}
+                  title="Clear Chat"
+                  aria-label="Clear current chat"
                 >
-                  <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
-            )}
-            {currentConversationId != null && (
-              <button
-                type="button"
-                className="control-btn"
-                onClick={openSaveTitleModal}
-                title="Save / Edit conversation name"
-                aria-label="Edit conversation name"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
+                  <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              )}
+              {currentConversationId != null && (
+                <button
+                  type="button"
+                  className="control-btn"
+                  onClick={openSaveTitleModal}
+                  title="Save / Edit conversation name"
+                  aria-label="Edit conversation name"
                 >
-                  <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
-                  <polyline points="17 21 17 13 7 13 7 21" />
-                  <polyline points="7 3 7 8 15 8" />
-                </svg>
-              </button>
-            )}
-          </div>
-
-          <div className="chat-voice-setting">
-            <span className="chat-voice-setting-label">Reply voice:</span>
-            <div className="chat-voice-setting-btns" role="group" aria-label="Assistant reply voice">
-              <button
-                type="button"
-                className={`chat-voice-btn ${responseVoice === "female" ? "active" : ""}`}
-                onClick={() => setResponseVoice("female")}
-                aria-pressed={responseVoice === "female"}
-                aria-label="Female voice"
-              >
-                Female
-              </button>
-              <button
-                type="button"
-                className={`chat-voice-btn ${responseVoice === "male" ? "active" : ""}`}
-                onClick={() => setResponseVoice("male")}
-                aria-pressed={responseVoice === "male"}
-                aria-label="Male voice"
-              >
-                Male
-              </button>
+                  <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+                    <polyline points="17 21 17 13 7 13 7 21" />
+                    <polyline points="7 3 7 8 15 8" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            <div className="chat-voice-setting" role="group" aria-label="Assistant reply voice">
+              <span className="chat-voice-setting-label">Reply voice</span>
+              <div className="chat-voice-setting-btns">
+                <button
+                  type="button"
+                  className={`chat-voice-btn ${responseVoice === "female" ? "active" : ""}`}
+                  onClick={() => setResponseVoice("female")}
+                  aria-pressed={responseVoice === "female"}
+                  aria-label="Female voice"
+                  title="Female voice"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <circle cx="12" cy="9" r="4" />
+                    <path d="M12 13v8" />
+                    <path d="M9 17h6" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  className={`chat-voice-btn ${responseVoice === "male" ? "active" : ""}`}
+                  onClick={() => setResponseVoice("male")}
+                  aria-pressed={responseVoice === "male"}
+                  aria-label="Male voice"
+                  title="Male voice"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <circle cx="10" cy="14" r="4" />
+                    <path d="M14 10l6-6" />
+                    <path d="M20 4v6h-6" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
 

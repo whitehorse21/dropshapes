@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { usePathname, useRouter } from 'next/navigation';
 import { useUI } from '../context/UIContext';
 import { useChat } from '../context/ChatContext';
 import ConfirmDeleteModal from './modals/ConfirmDeleteModal';
@@ -22,6 +23,8 @@ function formatChatDate(created_at: string): string {
 }
 
 export default function ChatSidebar() {
+  const pathname = usePathname();
+  const router = useRouter();
   const { sidebarOpen, closeSidebar } = useUI();
   const { conversations, currentConversationId, fetchConversations, selectConversation, deleteConversation } = useChat();
   const [deleteModalId, setDeleteModalId] = useState<number | null>(null);
@@ -33,6 +36,9 @@ export default function ChatSidebar() {
   const handleSelect = (id: number) => {
     selectConversation(id);
     closeSidebar();
+    if (pathname !== '/') {
+      router.push('/');
+    }
   };
 
   const handleDeleteClick = (e: React.MouseEvent, id: number) => {
