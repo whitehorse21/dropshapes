@@ -76,6 +76,10 @@ body.light-mode {
   background-image: none !important;
 }
 
+body.light-mode .app-loading-card {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
 body.zen-mode {
   background-image: none !important;
   background-color: var(--bg) !important;
@@ -388,14 +392,12 @@ body.dyslexia-tint-mode > * {
   margin-bottom: 32px;
 }
 
-.login-header h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 8px;
-  background: linear-gradient(135deg, var(--accent), var(--safe-green));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+.login-header-logo {
+  display: block;
+  margin: 0 auto 16px;
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
 }
 
 .login-header p {
@@ -882,7 +884,7 @@ main#mainContent.app-main {
 .app-loading-backdrop {
   position: absolute;
   inset: 0;
-  background: var(--bg-primary, #0f0f14);
+  background: var(--bg);
   opacity: 0.97;
 }
 
@@ -897,11 +899,9 @@ main#mainContent.app-main {
   width: 100%;
   padding: 40px 32px;
   border-radius: var(--radius-xl, 20px);
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
-  background: var(--card-bg, rgba(26, 26, 38, 0.95));
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.04),
-    0 24px 48px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--glass-border);
+  background: var(--card-bg);
+  box-shadow: var(--shadow-lg);
 }
 
 .app-loading-logo {
@@ -1341,6 +1341,8 @@ body.high-contrast-mode .header-minimal h1 {
   color: var(--text-primary);
   border-bottom-left-radius: 4px;
   backdrop-filter: blur(10px);
+  max-width: 100%;
+  padding: 18px 22px;
 }
 
 .chat-bubble:has(.chat-audio-player) {
@@ -1368,6 +1370,139 @@ body.high-contrast-mode .header-minimal h1 {
 
 .chat-bubble-text {
   display: block;
+}
+
+/* ChatGPT-style markdown inside assistant chat bubbles */
+.chat-markdown {
+  width: 100%;
+  line-height: 1.65;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+.chat-markdown p {
+  margin: 0 0 0.85em;
+}
+.chat-markdown p:last-child {
+  margin-bottom: 0;
+}
+.chat-markdown strong {
+  font-weight: 700;
+}
+.chat-markdown em {
+  font-style: italic;
+}
+/* Section headings (bold lines like "Things that may help you cope") */
+.chat-markdown p:has(strong:only-child),
+.chat-markdown h1, .chat-markdown h2, .chat-markdown h3, .chat-markdown h4 {
+  margin: 1.1em 0 0.5em;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text-primary);
+}
+.chat-markdown h1:first-child, .chat-markdown h2:first-child,
+.chat-markdown h3:first-child, .chat-markdown h4:first-child {
+  margin-top: 0;
+}
+.chat-markdown h1 { font-size: 1.2em; }
+.chat-markdown h2 { font-size: 1.12em; }
+.chat-markdown h3 { font-size: 1.06em; }
+.chat-markdown h4 { font-size: 1em; }
+/* Numbered list: show 1. 2. 3. and bold titles */
+.chat-markdown ol {
+  list-style-type: decimal;
+  list-style-position: outside;
+  margin: 0.6em 0 1em;
+  padding-left: 1.8em;
+  display: block;
+}
+.chat-markdown ol li {
+  display: list-item;
+  margin: 0.6em 0;
+  padding-left: 0.35em;
+}
+.chat-markdown ol li > p {
+  margin: 0.35em 0 0 0;
+}
+.chat-markdown ol li::marker {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+/* Bullet list: show discs for - items and nested lists */
+.chat-markdown ul {
+  list-style-type: disc;
+  list-style-position: outside;
+  margin: 0.4em 0 0.6em;
+  padding-left: 1.8em;
+  display: block;
+}
+.chat-markdown ol ul {
+  list-style-type: disc;
+  margin: 0.35em 0 0.5em 0;
+  padding-left: 1.5em;
+}
+.chat-markdown li {
+  display: list-item;
+  margin: 0.2em 0;
+}
+.chat-markdown ul li::marker {
+  color: var(--text-secondary, rgba(255, 255, 255, 0.75));
+}
+.chat-markdown li > p {
+  margin: 0;
+}
+.chat-markdown code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  padding: 0.15em 0.4em;
+  border-radius: 6px;
+  background: var(--glass-bg, rgba(255, 255, 255, 0.08));
+}
+.chat-markdown pre {
+  margin: 0.75em 0;
+  padding: 1em;
+  border-radius: 10px;
+  overflow-x: auto;
+  background: var(--glass-bg, rgba(255, 255, 255, 0.08));
+}
+.chat-markdown pre code {
+  padding: 0;
+  background: none;
+  font-size: 0.875em;
+}
+.chat-markdown a {
+  color: var(--accent, #5b7cff);
+  text-decoration: none;
+}
+.chat-markdown a:hover {
+  text-decoration: underline;
+}
+.chat-markdown blockquote {
+  margin: 0.75em 0;
+  padding-left: 1em;
+  border-left: 3px solid var(--glass-border, rgba(255, 255, 255, 0.2));
+  color: var(--text-secondary, rgba(255, 255, 255, 0.75));
+}
+.chat-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75em 0;
+  font-size: 0.9em;
+}
+.chat-markdown th, .chat-markdown td {
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.15));
+  padding: 0.4em 0.6em;
+  text-align: left;
+}
+.chat-markdown th {
+  font-weight: 600;
+  background: var(--glass-bg, rgba(255, 255, 255, 0.05));
+}
+.chat-markdown hr {
+  border: none;
+  border-top: 1px solid var(--glass-border, rgba(255, 255, 255, 0.15));
+  margin: 1em 0;
 }
 
 .chat-time {

@@ -9,6 +9,7 @@ import { useChat } from "@/app/context/ChatContext";
 import axiosInstance from "@/app/apimodule/axiosConfig/Axios";
 import ApiEndpoints from "@/app/apimodule/endpoints/ApiEndpoints";
 import ConfirmDeleteModal from "@/app/components/modals/ConfirmDeleteModal";
+import ChatMessageContent from "@/app/components/chat/ChatMessageContent";
 
 export default function HomeView() {
   const router = useRouter();
@@ -104,24 +105,27 @@ export default function HomeView() {
       });
       const data = res.data;
       setConversationIdAfterSend(data.conversation_id);
-      appendMessages(
-        {
-          id: data.user_message?.id,
-          text: data.user_message?.content ?? text,
-          sender: "user",
-          timestamp: new Date(
-            data.user_message?.created_at || Date.now(),
-          ).getTime(),
-        },
-        {
-          id: data.assistant_message?.id,
-          text: data.assistant_message?.content ?? "",
-          sender: "ai",
-          timestamp: new Date(
-            data.assistant_message?.created_at || Date.now(),
-          ).getTime(),
-        },
-      );
+      const userMsg = {
+        id: data.user_message?.id,
+        text: data.user_message?.content ?? text,
+        sender: "user" as const,
+        timestamp: new Date(
+          data.user_message?.created_at || Date.now(),
+        ).getTime(),
+      };
+      const assistantMsg = {
+        id: data.assistant_message?.id,
+        text: data.assistant_message?.content ?? "",
+        sender: "ai" as const,
+        timestamp: new Date(
+          data.assistant_message?.created_at || Date.now(),
+        ).getTime(),
+      };
+      // Replace optimistic user message with server version, then add assistant reply (avoid duplicate user bubble)
+      setMessages((prev) => {
+        const withoutLast = prev.slice(0, -1);
+        return [...withoutLast, userMsg, assistantMsg];
+      });
       fetchConversations();
     } catch (e: unknown) {
       const err = e as {
@@ -356,9 +360,11 @@ export default function HomeView() {
                     />
                   )}
                   {msg.text && (
-                    <span className={msg.audioUrl ? "chat-bubble-text" : ""}>
-                      {msg.text}
-                    </span>
+                    <ChatMessageContent
+                      text={msg.text}
+                      sender={msg.sender}
+                      className={msg.audioUrl ? "chat-bubble-text" : ""}
+                    />
                   )}
                 </div>
                 <div className="chat-time">

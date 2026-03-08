@@ -85,7 +85,13 @@ export default function LoginView() {
     <div id="view-login">
       <div className="login-container">
         <div className="login-header">
-          <h1>Welcome to Dropshapes</h1>
+          <img
+            src="/logo.png"
+            alt="Dropshapes"
+            className="login-header-logo"
+            width={120}
+            height={120}
+          />
           <p>Your distraction-free workspace awaits.</p>
         </div>
 
