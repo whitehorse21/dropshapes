@@ -2,7 +2,7 @@ import logging
 import uuid
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query, Request, Form
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
@@ -23,6 +23,7 @@ from app.schemas.chat import (
 from anthropic import NotFoundError as AnthropicNotFoundError
 from app.services.claude_chat_service import ClaudeChatService
 from app.services.speech_to_text_service import transcribe_audio
+from app.services.text_to_speech_service import TextToSpeechService
 from app.core.auth import create_access_token
 from jose import jwt, JWTError
 from datetime import timedelta
@@ -285,7 +286,8 @@ def get_message_audio(
         if not current_user:
             raise HTTPException(status_code=401, detail="Playback token or authentication required")
         msg = _get_message_and_verify_access(message_id, db, current_user)
-    if not (msg.content and msg.content.strip().startswith("http")):
+    audio_s3_key = (msg.audio_url or msg.content or "").strip()
+    if not audio_s3_key.startswith("http"):
         raise HTTPException(status_code=404, detail="No audio for this message")
     if not settings.USE_S3_STORAGE:
         raise HTTPException(status_code=503, detail="Audio storage not available")
@@ -293,7 +295,7 @@ def get_message_audio(
     storage = get_storage()
     if not storage:
         raise HTTPException(status_code=503, detail="Audio storage not available")
-    presigned = storage.generate_presigned_url(msg.content, expires_in=3600)
+    presigned = storage.generate_presigned_url(audio_s3_key, expires_in=3600)
     if not presigned:
         raise HTTPException(status_code=502, detail="Could not generate playback URL")
     return RedirectResponse(url=presigned, status_code=302)
@@ -311,7 +313,8 @@ def get_message_audio_url(
     Use this when you have a message with audio and need a playable URL (e.g. cross-origin).
     """
     msg = _get_message_and_verify_access(message_id, db, current_user)
-    if not (msg.content and msg.content.strip().startswith("http")):
+    has_audio = (msg.audio_url and msg.audio_url.strip()) or (msg.content and msg.content.strip().startswith("http"))
+    if not has_audio:
         raise HTTPException(status_code=404, detail="No audio for this message")
     token = _create_playback_token(message_id)
     base = str(request.base_url).rstrip("/")
@@ -319,16 +322,24 @@ def get_message_audio_url(
     return {"url": url}
 
 
+# Voice for assistant TTS: female -> Joanna, male -> Matthew (AWS Polly)
+CHAT_RESPONSE_VOICE_FEMALE = "Joanna"
+CHAT_RESPONSE_VOICE_MALE = "Matthew"
+
+
 @router.post("/audio", response_model=ChatSendResponse)
 async def send_audio(
     audio: UploadFile = File(...),
     conversation_id: Optional[int] = Query(None),
+    response_voice: Optional[str] = Form("female"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
     """
     Upload audio: save to S3, create user message with content=audio S3 URL,
-    transcribe for Claude, get assistant response, create assistant message. All scoped to logged-in user.
+    transcribe for Claude, get assistant response, generate TTS audio, save to S3,
+    create assistant message with content=text and audio_url=TTS S3 URL. Scoped to logged-in user.
+    response_voice: "female" or "male" for assistant reply voice.
     """
     raw = await audio.read()
     if not raw:
@@ -430,10 +441,37 @@ async def send_audio(
             detail = "Invalid or missing chat API key. Check backend .env ANTHROPIC_API_KEY."
         raise HTTPException(status_code=502, detail=f"Chat assistant error: {detail}")
 
+    assistant_audio_url = None
+    if assistant_text and settings.USE_S3_STORAGE:
+        voice = (response_voice or "female").strip().lower()
+        polly_voice = CHAT_RESPONSE_VOICE_MALE if voice == "male" else CHAT_RESPONSE_VOICE_FEMALE
+        text_for_tts = assistant_text[:3000] if len(assistant_text) > 3000 else assistant_text
+        try:
+            tts_service = TextToSpeechService()
+            audio_bytes = await tts_service.synthesize_speech(
+                text_for_tts, lang="en", voice_id=polly_voice
+            )
+            from app.utils.storage import get_storage
+            storage = get_storage()
+            if storage and audio_bytes:
+                key = f"chat_audio/assistant_{uuid.uuid4().hex}.mp3"
+                try:
+                    assistant_audio_url = storage.upload_file_content(
+                        audio_bytes, key=key, content_type="audio/mpeg", public_read=True
+                    )
+                except Exception as acl_err:
+                    logger.debug("Upload assistant audio with public-read failed: %s", acl_err)
+                    assistant_audio_url = storage.upload_file_content(
+                        audio_bytes, key=key, content_type="audio/mpeg", public_read=False
+                    )
+        except Exception as e:
+            logger.warning("TTS for chat assistant failed (continuing without audio): %s", e)
+
     assistant_msg = ChatMessage(
         conversation_id=convo.id,
         role="assistant",
         content=assistant_text,
+        audio_url=assistant_audio_url,
     )
     db.add(assistant_msg)
     if convo.title == "New Chat" and len(existing) <= 1:

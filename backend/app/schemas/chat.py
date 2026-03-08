@@ -12,6 +12,7 @@ class ChatMessageResponse(BaseModel):
     id: int
     role: str
     content: str  # Text or, for user voice: S3 audio URL
+    audio_url: Optional[str] = None  # Assistant TTS audio URL (when role=assistant)
     created_at: datetime
 
     class Config:

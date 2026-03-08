@@ -34,24 +34,35 @@ export default function HomeView() {
   const [saveTitleModalOpen, setSaveTitleModalOpen] = useState(false);
   const [saveTitleValue, setSaveTitleValue] = useState("");
   const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [responseVoice, setResponseVoice] = useState<"female" | "male">("female");
   const [playbackUrls, setPlaybackUrls] = useState<Record<number, string>>({});
   const playbackRequestedRef = useRef<Set<number>>(new Set());
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  /** When true, skip typing animation (e.g. after loading a conversation from history). Cleared when user sends a new message. */
+  const [justLoadedConversation, setJustLoadedConversation] = useState(false);
 
   const isChatActive = messages.length > 0;
+
+  useEffect(() => {
+    if (loading) setJustLoadedConversation(true);
+  }, [loading]);
 
   useEffect(() => {
     if (isAuthenticated) fetchConversations();
   }, [isAuthenticated, fetchConversations]);
 
-  useEffect(() => {
+  const scrollChatToBottom = useCallback(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, []);
+
+  useEffect(() => {
+    scrollChatToBottom();
+  }, [messages, sending, scrollChatToBottom]);
 
   // Fetch playable URL for stored voice messages (S3 presigned via backend)
   useEffect(() => {
@@ -93,6 +104,7 @@ export default function HomeView() {
       return;
     }
     setInputVal("");
+    setJustLoadedConversation(false);
     setMessages((prev) => [
       ...prev,
       { text, sender: "user", timestamp: Date.now() },
@@ -172,8 +184,10 @@ export default function HomeView() {
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
         const form = new FormData();
         form.append("audio", blob, "audio.webm");
+        form.append("response_voice", responseVoice);
         const audioUrl = URL.createObjectURL(blob);
 
+        setJustLoadedConversation(false);
         // Show user's voice message in chat immediately with playable audio
         setMessages((prev) => [
           ...prev,
@@ -218,6 +232,7 @@ export default function HomeView() {
             timestamp: new Date(
               data.assistant_message?.created_at || Date.now(),
             ).getTime(),
+            audioUrl: data.assistant_message?.audio_url ?? undefined,
           };
           // Replace optimistic placeholder with real user message (with audio) + assistant reply
           setMessages((prev) => {
@@ -263,6 +278,7 @@ export default function HomeView() {
   }, [
     isAuthenticated,
     currentConversationId,
+    responseVoice,
     router,
     appendMessages,
     setMessages,
@@ -364,6 +380,20 @@ export default function HomeView() {
                       text={msg.text}
                       sender={msg.sender}
                       className={msg.audioUrl ? "chat-bubble-text" : ""}
+                      skipTyping={
+                        justLoadedConversation ||
+                        !(
+                          idx === messages.length - 1 &&
+                          msg.sender === "ai"
+                        )
+                      }
+                      onDisplayChange={
+                        idx === messages.length - 1 &&
+                        msg.sender === "ai" &&
+                        !justLoadedConversation
+                          ? scrollChatToBottom
+                          : undefined
+                      }
                     />
                   )}
                 </div>
@@ -455,6 +485,30 @@ export default function HomeView() {
                 </svg>
               </button>
             )}
+          </div>
+
+          <div className="chat-voice-setting">
+            <span className="chat-voice-setting-label">Reply voice:</span>
+            <div className="chat-voice-setting-btns" role="group" aria-label="Assistant reply voice">
+              <button
+                type="button"
+                className={`chat-voice-btn ${responseVoice === "female" ? "active" : ""}`}
+                onClick={() => setResponseVoice("female")}
+                aria-pressed={responseVoice === "female"}
+                aria-label="Female voice"
+              >
+                Female
+              </button>
+              <button
+                type="button"
+                className={`chat-voice-btn ${responseVoice === "male" ? "active" : ""}`}
+                onClick={() => setResponseVoice("male")}
+                aria-pressed={responseVoice === "male"}
+                aria-label="Male voice"
+              >
+                Male
+              </button>
+            </div>
           </div>
 
           <div className="search-aura-container">

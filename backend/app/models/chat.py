@@ -25,6 +25,7 @@ class ChatMessage(Base):
     conversation_id = Column(Integer, ForeignKey("chat_conversations.id", ondelete="CASCADE"), nullable=False, index=True)
     role = Column(String(20), nullable=False)  # 'user' | 'assistant'
     content = Column(Text, nullable=False)  # Text message or, for user voice: S3 audio URL
+    audio_url = Column(String(2000), nullable=True)  # Assistant TTS audio S3 URL (when role=assistant)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     conversation = relationship("ChatConversation", back_populates="messages")

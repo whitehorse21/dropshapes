@@ -59,14 +59,15 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       const res = await axiosInstance.get(ApiEndpoints.chatConversation(id));
       const list = res.data?.messages ?? [];
       setMessages(
-        list.map((m: { id: number; role: string; content: string; created_at: string }) => {
-          const isVoice = m.role === "user" && m.content.startsWith("http");
+        list.map((m: { id: number; role: string; content: string; created_at: string; audio_url?: string }) => {
+          const isUserVoice = m.role === "user" && m.content.startsWith("http");
+          const assistantAudio = m.role === "assistant" && m.audio_url ? m.audio_url : undefined;
           return {
             id: m.id,
-            text: isVoice ? "Voice message" : m.content,
+            text: isUserVoice ? "Voice message" : m.content,
             sender: m.role === "user" ? "user" : "ai",
             timestamp: new Date(m.created_at).getTime(),
-            ...(isVoice ? { audioUrl: m.content } : {}),
+            ...(isUserVoice ? { audioUrl: m.content } : assistantAudio ? { audioUrl: assistantAudio } : {}),
           };
         })
       );
