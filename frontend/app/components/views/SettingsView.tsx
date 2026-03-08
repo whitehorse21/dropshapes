@@ -19,6 +19,9 @@ export default function SettingsView() {
     const [displayNameSaving, setDisplayNameSaving] = useState(false);
     const [displayNameMessage, setDisplayNameMessage] = useState<'success' | 'error' | null>(null);
 
+    const replyVoice = (user?.reply_voice === 'female' ? 'female' : 'male') as 'female' | 'male';
+    const [replyVoiceSaving, setReplyVoiceSaving] = useState(false);
+
     useEffect(() => {
         setDisplayNameValue(serverName);
     }, [serverName]);
@@ -51,6 +54,17 @@ export default function SettingsView() {
 
     const handleSubscription = () => {
         router.push('/subscription');
+    };
+
+    const handleReplyVoiceChange = async (voice: 'female' | 'male') => {
+        if (voice === replyVoice) return;
+        setReplyVoiceSaving(true);
+        try {
+            const result = await updateProfile({ reply_voice: voice });
+            if (result.success) setReplyVoiceSaving(false);
+        } catch {
+            setReplyVoiceSaving(false);
+        }
     };
 
     const renderSwitch = (label: string, desc: string, key: keyof Settings) => {
@@ -134,6 +148,46 @@ export default function SettingsView() {
                 </div>
 
                 {renderSwitch('Light Mode', 'Switch between dark and light themes', 'theme')}
+
+                <div className="group-title">CHAT</div>
+                <div className="settings-item settings-reply-voice">
+                    <div className="settings-item-content">
+                        <div className="item-title">Reply voice</div>
+                        <div className="item-desc">Assistant voice when you send a voice message</div>
+                    </div>
+                    <div className="chat-voice-setting-btns" role="group" aria-label="Assistant reply voice">
+                        <button
+                            type="button"
+                            className={`chat-voice-btn ${replyVoice === 'female' ? 'active' : ''}`}
+                            onClick={() => handleReplyVoiceChange('female')}
+                            disabled={replyVoiceSaving}
+                            aria-pressed={replyVoice === 'female'}
+                            aria-label="Female voice"
+                            title="Female voice"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                                <circle cx="12" cy="9" r="4" />
+                                <path d="M12 13v8" />
+                                <path d="M9 17h6" />
+                            </svg>
+                        </button>
+                        <button
+                            type="button"
+                            className={`chat-voice-btn ${replyVoice === 'male' ? 'active' : ''}`}
+                            onClick={() => handleReplyVoiceChange('male')}
+                            disabled={replyVoiceSaving}
+                            aria-pressed={replyVoice === 'male'}
+                            aria-label="Male voice"
+                            title="Male voice"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                                <circle cx="10" cy="14" r="4" />
+                                <path d="M14 10l6-6" />
+                                <path d="M20 4v6h-6" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
 
                 <div className="group-title">SUBSCRIPTION</div>
 

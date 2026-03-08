@@ -26,7 +26,8 @@ class User(Base):
     ai_credits = Column(Integer, default=0)  # Credits for AI features (bonus/trial credits)
     subscription_tokens_used = Column(Integer, default=0)  # Tokens used from subscription plan
     has_used_free_limits = Column(Boolean, default=False)  # Track if user has used free limits before subscribing
-    
+    reply_voice = Column(String(10), default="male", nullable=True)  # Chat assistant TTS: "female" | "male"
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
       # Relationships

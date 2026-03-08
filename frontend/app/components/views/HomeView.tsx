@@ -34,7 +34,6 @@ export default function HomeView() {
   const [saveTitleModalOpen, setSaveTitleModalOpen] = useState(false);
   const [saveTitleValue, setSaveTitleValue] = useState("");
   const [recordingSeconds, setRecordingSeconds] = useState(0);
-  const [responseVoice, setResponseVoice] = useState<"female" | "male">("female");
   const [playbackUrls, setPlaybackUrls] = useState<Record<number, string>>({});
   const playbackRequestedRef = useRef<Set<number>>(new Set());
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -193,7 +192,6 @@ export default function HomeView() {
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
         const form = new FormData();
         form.append("audio", blob, "audio.webm");
-        form.append("response_voice", responseVoice);
         const audioUrl = URL.createObjectURL(blob);
 
         setJustLoadedConversation(false);
@@ -282,7 +280,6 @@ export default function HomeView() {
   }, [
     isAuthenticated,
     currentConversationId,
-    responseVoice,
     router,
     appendMessages,
     setMessages,
@@ -477,39 +474,6 @@ export default function HomeView() {
                   </svg>
                 </button>
               )}
-            </div>
-            <div className="chat-voice-setting" role="group" aria-label="Assistant reply voice">
-              <span className="chat-voice-setting-label">Reply voice</span>
-              <div className="chat-voice-setting-btns">
-                <button
-                  type="button"
-                  className={`chat-voice-btn ${responseVoice === "female" ? "active" : ""}`}
-                  onClick={() => setResponseVoice("female")}
-                  aria-pressed={responseVoice === "female"}
-                  aria-label="Female voice"
-                  title="Female voice"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <circle cx="12" cy="9" r="4" />
-                    <path d="M12 13v8" />
-                    <path d="M9 17h6" />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  className={`chat-voice-btn ${responseVoice === "male" ? "active" : ""}`}
-                  onClick={() => setResponseVoice("male")}
-                  aria-pressed={responseVoice === "male"}
-                  aria-label="Male voice"
-                  title="Male voice"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <circle cx="10" cy="14" r="4" />
-                    <path d="M14 10l6-6" />
-                    <path d="M20 4v6h-6" />
-                  </svg>
-                </button>
-              </div>
             </div>
           </div>
 

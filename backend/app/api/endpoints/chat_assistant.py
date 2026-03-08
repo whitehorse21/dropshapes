@@ -331,7 +331,6 @@ CHAT_RESPONSE_VOICE_MALE = "Matthew"
 async def send_audio(
     audio: UploadFile = File(...),
     conversation_id: Optional[int] = Query(None),
-    response_voice: Optional[str] = Form("female"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
@@ -339,7 +338,7 @@ async def send_audio(
     Upload audio: save to S3, create user message with content=audio S3 URL,
     transcribe for Claude, get assistant response, generate TTS audio, save to S3,
     create assistant message with content=text and audio_url=TTS S3 URL. Scoped to logged-in user.
-    response_voice: "female" or "male" for assistant reply voice.
+    Assistant reply voice is taken from the user's saved preference (Settings → Reply voice).
     """
     raw = await audio.read()
     if not raw:
@@ -443,7 +442,7 @@ async def send_audio(
 
     assistant_audio_url = None
     if assistant_text and settings.USE_S3_STORAGE:
-        voice = (response_voice or "female").strip().lower()
+        voice = (getattr(current_user, "reply_voice", None) or "male").strip().lower()
         polly_voice = CHAT_RESPONSE_VOICE_MALE if voice == "male" else CHAT_RESPONSE_VOICE_FEMALE
         text_for_tts = assistant_text[:3000] if len(assistant_text) > 3000 else assistant_text
         try:

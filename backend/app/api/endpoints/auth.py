@@ -58,6 +58,7 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
         "is_admin": db_user.is_admin,
         "profile_image": db_user.profile_image,
         "ai_credits": db_user.ai_credits,
+        "reply_voice": getattr(db_user, "reply_voice", None),
         "created_at": db_user.created_at,
         "updated_at": db_user.updated_at
     }
@@ -115,6 +116,7 @@ def login_json(
             "is_admin": user.is_admin,
             "profile_image": user.profile_image,
             "ai_credits": user.ai_credits,
+            "reply_voice": getattr(user, "reply_voice", None),
             "created_at": user.created_at,
             "updated_at": user.updated_at
         }
@@ -171,6 +173,7 @@ def login_form(
         "is_admin": user.is_admin,
         "profile_image": user.profile_image,
         "ai_credits": user.ai_credits,
+        "reply_voice": getattr(user, "reply_voice", None),
         "created_at": user.created_at,
         "updated_at": user.updated_at
     }

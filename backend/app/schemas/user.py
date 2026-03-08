@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Literal
 from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 
@@ -34,6 +34,7 @@ class UserUpdate(BaseModel):
     bio: Optional[str] = None
     location: Optional[str] = None
     website: Optional[str] = None
+    reply_voice: Optional[Literal["female", "male"]] = None  # Chat assistant TTS
 
 
 class UserInDB(UserBase):
@@ -44,6 +45,7 @@ class UserInDB(UserBase):
     location: Optional[str] = None
     website: Optional[str] = None
     ai_credits: int = 0
+    reply_voice: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
 

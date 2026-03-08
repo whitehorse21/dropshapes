@@ -1634,7 +1634,7 @@ body.high-contrast-mode .header-minimal h1 {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 8px 16px;
   width: 100%;
   max-width: 100%;

@@ -9,6 +9,8 @@ export interface AuthUser {
   username?: string;
   name?: string;
   is_admin?: boolean;
+  /** Chat assistant TTS: "female" | "male" (saved in Settings) */
+  reply_voice?: string;
   [key: string]: unknown;
 }
 
