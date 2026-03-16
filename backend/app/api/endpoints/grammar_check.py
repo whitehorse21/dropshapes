@@ -6,10 +6,13 @@ from app.core.auth import get_current_active_user
 from app.models.user import User
 from app.db.session import get_db
 from app.schemas.grammar_check import (
-    GrammarCheckRequest, 
-    GrammarCheckResponse, 
-    GrammarCheckError
+    GrammarCheckRequest,
+    GrammarCheckResponse,
+    GrammarCheckError,
+    AIDetectRequest,
+    AIDetectResponse,
 )
+from app.services.ai_detector_service import detect as ai_detect
 import logging
 
 logger = logging.getLogger(__name__)
@@ -54,6 +57,35 @@ async def grammar_check(
     except Exception as e:
         logger.error(f"Grammar check service error: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
-            detail="Grammar check service temporarily unavailable"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Grammar check service temporarily unavailable",
+        )
+
+
+@router.post("/detect-ai/", response_model=AIDetectResponse)
+async def detect_ai(
+    request: AIDetectRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Estimate whether the text is likely human-written or AI-generated.
+    Uses heuristic analysis (burstiness, word diversity, etc.). Deducts 1 AI credit per request.
+    """
+    try:
+        AICreditService.check_and_deduct_credits(db, current_user, 1)
+        human_score, ai_score, label = ai_detect(request.text)
+        return AIDetectResponse(
+            human_score=human_score,
+            ai_score=ai_score,
+            label=label,
+        )
+    except ValueError as ve:
+        logger.warning(f"AI detect validation error: {str(ve)}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+    except Exception as e:
+        logger.error(f"AI detect service error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="AI detection temporarily unavailable",
         )

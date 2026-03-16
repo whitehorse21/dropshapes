@@ -1576,6 +1576,31 @@ body.high-contrast-mode .header-minimal h1 {
   padding: 0 4px;
 }
 
+/* Follow-up option chips under last assistant message */
+.chat-follow-up-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 0 4px;
+  max-width: 100%;
+}
+.chat-follow-up-chip {
+  font-size: 0.8rem;
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--glass-border);
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.chat-follow-up-chip:hover {
+  background: var(--accent-subtle, rgba(99, 102, 241, 0.12));
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 /* Typing indicator while waiting for chatbot response */
 .chat-typing .chat-typing-bubble {
   display: flex;
@@ -11048,6 +11073,81 @@ body:not(.light-mode) .cover-letter-preview-document {
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 16px;
+}
+
+.grammar-check-actions-row--detect {
+  margin-top: 8px;
+}
+
+.grammar-check-ai-detect-card {
+  margin-top: 16px;
+}
+
+.grammar-check-ai-detect-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: var(--text-primary);
+}
+
+.grammar-check-ai-detect-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0 0 12px;
+  color: var(--text-secondary);
+}
+
+.grammar-check-ai-detect-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.grammar-check-ai-detect-bar-wrap {
+  display: grid;
+  grid-template-columns: 56px 1fr 44px;
+  align-items: center;
+  gap: 10px;
+}
+
+.grammar-check-ai-detect-bar-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.grammar-check-ai-detect-bar {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--input-bg);
+  overflow: hidden;
+}
+
+.grammar-check-ai-detect-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.25s ease;
+}
+
+.grammar-check-ai-detect-bar-fill--human {
+  background: linear-gradient(90deg, var(--safe-green), #4ade80);
+}
+
+.grammar-check-ai-detect-bar-fill--ai {
+  background: linear-gradient(90deg, #f59e0b, var(--danger-red));
+}
+
+.grammar-check-ai-detect-bar-pct {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+.grammar-check-ai-detect-disclaimer {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin: 0;
 }
 
 /* Task management (Roadmap) */

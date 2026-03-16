@@ -65,3 +65,21 @@ class GrammarCheckError(BaseModel):
     error: str = Field(..., description="Error message")
     details: Optional[str] = Field(None, description="Additional error details")
     code: Optional[str] = Field(None, description="Error code")
+
+
+class AIDetectRequest(BaseModel):
+    """Request model for AI detection (human vs AI-generated text)"""
+    text: str = Field(..., min_length=1, max_length=5000, description="Text to analyze")
+
+    @validator("text")
+    def validate_text(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("Text cannot be empty or only whitespace")
+        return v.strip()[:5000]
+
+
+class AIDetectResponse(BaseModel):
+    """Response model for AI detection"""
+    human_score: float = Field(..., ge=0.0, le=1.0, description="Estimated likelihood text is human-written (0-1)")
+    ai_score: float = Field(..., ge=0.0, le=1.0, description="Estimated likelihood text is AI-generated (0-1)")
+    label: str = Field(..., description="Short label: e.g. 'Likely human-written', 'Likely AI-generated'")

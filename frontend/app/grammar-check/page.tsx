@@ -25,12 +25,20 @@ interface GrammarResult {
   };
 }
 
+interface AIDetectResult {
+  human_score: number;
+  ai_score: number;
+  label: string;
+}
+
 function GrammarCheckContent() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [grammarResult, setGrammarResult] = useState<GrammarResult | null>(null);
   const [text, setText] = useState('');
   const [history, setHistory] = useState<string[]>([]);
+  const [detectLoading, setDetectLoading] = useState(false);
+  const [aiDetectResult, setAiDetectResult] = useState<AIDetectResult | null>(null);
 
   const corrections = grammarResult?.corrections || [];
 
@@ -80,6 +88,24 @@ function GrammarCheckContent() {
     setText(newText);
   };
 
+  const handleDetectAI = async () => {
+    if (!text.trim()) {
+      setAiDetectResult(null);
+      return;
+    }
+    setDetectLoading(true);
+    setAiDetectResult(null);
+    try {
+      const res = await axiosInstance.post<AIDetectResult>('grammar-check/detect-ai/', { text: text.trim() });
+      setAiDetectResult(res.data);
+    } catch (err) {
+      console.error('AI detect failed:', err);
+      setAiDetectResult(null);
+    } finally {
+      setDetectLoading(false);
+    }
+  };
+
   return (
     <section id="view-grammar-check" className="view-section active-view" aria-label="Grammar Check">
       <div className="grammar-check-page">
@@ -117,12 +143,63 @@ function GrammarCheckContent() {
               onClick={() => {
                 setText('');
                 setGrammarResult(null);
+                setAiDetectResult(null);
               }}
             >
               Clear input
             </button>
           </div>
         </div>
+
+        <div className="grammar-check-actions-row grammar-check-actions-row--detect">
+          <button
+            type="button"
+            className="btn-resume"
+            onClick={handleDetectAI}
+            disabled={detectLoading || !text.trim()}
+            aria-label="Detect if text is AI-generated"
+          >
+            {detectLoading ? 'Analyzing…' : 'Detect AI'}
+          </button>
+        </div>
+
+        {aiDetectResult && (
+          <div className="grammar-check-card grammar-check-ai-detect-card">
+            <h3 className="grammar-check-ai-detect-title">AI detection</h3>
+            <p className="grammar-check-ai-detect-label" aria-live="polite">
+              {aiDetectResult.label}
+            </p>
+            <div className="grammar-check-ai-detect-bars">
+              <div className="grammar-check-ai-detect-bar-wrap">
+                <span className="grammar-check-ai-detect-bar-label">Human</span>
+                <div className="grammar-check-ai-detect-bar" role="presentation">
+                  <div
+                    className="grammar-check-ai-detect-bar-fill grammar-check-ai-detect-bar-fill--human"
+                    style={{ width: `${Math.round(aiDetectResult.human_score * 100)}%` }}
+                  />
+                </div>
+                <span className="grammar-check-ai-detect-bar-pct">
+                  {Math.round(aiDetectResult.human_score * 100)}%
+                </span>
+              </div>
+              <div className="grammar-check-ai-detect-bar-wrap">
+                <span className="grammar-check-ai-detect-bar-label">AI</span>
+                <div className="grammar-check-ai-detect-bar" role="presentation">
+                  <div
+                    className="grammar-check-ai-detect-bar-fill grammar-check-ai-detect-bar-fill--ai"
+                    style={{ width: `${Math.round(aiDetectResult.ai_score * 100)}%` }}
+                  />
+                </div>
+                <span className="grammar-check-ai-detect-bar-pct">
+                  {Math.round(aiDetectResult.ai_score * 100)}%
+                </span>
+              </div>
+            </div>
+            <p className="grammar-check-ai-detect-disclaimer">
+              This is an estimate based on text patterns, not a definitive check.
+            </p>
+          </div>
+        )}
 
         {grammarResult?.correctedText && (
           <div className="grammar-check-card">

@@ -100,7 +100,8 @@ const endpoints = {
     // Grammar Check Service
     grammarCheck: {
       check: formatEndpoint('ai/grammar-check/check'),
-      improve: formatEndpoint('ai/grammar-check/improve')
+      improve: formatEndpoint('ai/grammar-check/improve'),
+      detectAi: formatEndpoint('grammar-check/detect-ai')
     },
     
     // Task Management Service

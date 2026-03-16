@@ -45,6 +45,19 @@ export default function HomeView() {
 
   const isChatActive = messages.length > 0;
 
+  /** Follow-up options shown under the last assistant message so the user can elaborate. */
+  const FOLLOW_UP_OPTIONS = [
+    "Tell me more",
+    "Give me an example",
+    "I need more detail",
+    "Can you explain that differently?",
+  ];
+  const setInputFromOption = (option: string) => {
+    setInputVal(option);
+    const input = document.getElementById("mainInput") as HTMLInputElement | null;
+    input?.focus();
+  };
+
   /* When a conversation finishes loading (loading true → false), show all messages without typing animation. */
   useEffect(() => {
     if (prevLoadingRef.current && !loading) setJustLoadedConversation(true);
@@ -413,6 +426,22 @@ export default function HomeView() {
                     minute: "2-digit",
                   })}
                 </div>
+                {msg.sender === "ai" &&
+                  idx === messages.length - 1 &&
+                  !sending && (
+                  <div className="chat-follow-up-options" role="group" aria-label="Follow-up options">
+                    {FOLLOW_UP_OPTIONS.map((option) => (
+                      <button
+                        key={option}
+                        type="button"
+                        className="chat-follow-up-chip"
+                        onClick={() => setInputFromOption(option)}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           {!loading && sending && (
