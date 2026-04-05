@@ -94,9 +94,9 @@ class Settings(BaseSettings):
     STRIPE_WEBHOOK_SECRET: str
     
     # Trial Configuration
-    TRIAL_AI_CREDITS: int = 10  # Number of free AI credits for new users
-    TRIAL_RESUME_LIMIT: int = 3  # Number of free resumes for new users
-    TRIAL_COVER_LETTER_LIMIT: int = 3  # Number of free cover letters for new users
+    TRIAL_AI_CREDITS: int = 100  # Number of free AI credits for new users
+    TRIAL_RESUME_LIMIT: int = 10  # Number of free resumes for new users
+    TRIAL_COVER_LETTER_LIMIT: int = 10  # Number of free cover letters for new users
 
     # Chat Assistant (Claude)
     ANTHROPIC_API_KEY: str = ""
