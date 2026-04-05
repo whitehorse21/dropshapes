@@ -74,7 +74,8 @@ app.add_middleware(
         "https://*.stripe.com",  # Allow all Stripe subdomains
         "https://*.stripe.network",  # Allow all Stripe network subdomains
         "http://localhost:3000",  # For development
-        "http://127.0.0.1:3000"   # For development
+        "http://127.0.0.1:3000",  # For development
+        "https://dropshapes.vercel.app",  # Vercel preview / production frontend
     ],
     allow_credentials=True,  # Enable credentials for authentication
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],

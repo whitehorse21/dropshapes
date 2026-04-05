@@ -34,10 +34,11 @@ class Settings(BaseSettings):
     # CORS
     CORS_ORIGINS: List[str] = [
         "https://dropshapes.com",
-        "https://www.dropshapes.com", 
+        "https://www.dropshapes.com",
         "https://api.dropshapes.com",
+        "https://dropshapes.vercel.app",
         "http://localhost:3000",
-        "http://127.0.0.1:3000"
+        "http://127.0.0.1:3000",
     ]
     
     # AWS S3 Configuration - Read from .env
