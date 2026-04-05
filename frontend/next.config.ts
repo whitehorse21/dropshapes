@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
   // "webpack config but no turbopack config" error. Use `next build --webpack` to use webpack.
   turbopack: {},
 
+  // html-to-docx bundles node-fetch, which optionally requires the `encoding` package;
+  // keep it external so Node resolves it at runtime and the bundle stays smaller.
+  serverExternalPackages: ["html-to-docx"],
+
   // React 19 + Next.js 16 compatibility settings
   reactStrictMode: true,
 

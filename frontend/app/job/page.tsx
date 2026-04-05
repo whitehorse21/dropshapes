@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { ResumesPageContent } from "@/app/resumes/page";
-import { CoverLettersContent } from "@/app/cover-letters/page";
+import { ResumesPageContent } from "@/app/resumes/ResumesPageContent";
+import { CoverLettersContent } from "@/app/cover-letters/CoverLettersContent";
 
 type JobTab = "resumes" | "cover-letters";
 
