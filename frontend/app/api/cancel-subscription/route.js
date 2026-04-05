@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/';
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/";
 
 /**
  * POST /api/cancel-subscription
@@ -8,16 +9,16 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/'
  * Expects Authorization: Bearer <token> on the request.
  */
 export async function POST(request) {
-  const auth = request.headers.get('authorization') || '';
-  const url = `${API_BASE.replace(/\/+$/, '')}/subscriptions/cancel`;
+  const auth = request.headers.get("authorization") || "";
+  const url = `${API_BASE.replace(/\/+$/, "")}/subscriptions/cancel`;
 
   try {
     const res = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': auth,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: auth,
       },
       body: JSON.stringify({}),
     });
@@ -26,17 +27,17 @@ export async function POST(request) {
 
     if (!res.ok) {
       return NextResponse.json(
-        { detail: data?.detail ?? 'Failed to cancel subscription' },
-        { status: res.status }
+        { detail: data?.detail ?? "Failed to cancel subscription" },
+        { status: res.status },
       );
     }
 
     return NextResponse.json(data);
   } catch (err) {
-    console.error('Cancel subscription proxy error:', err);
+    console.error("Cancel subscription proxy error:", err);
     return NextResponse.json(
-      { detail: 'Unable to reach the server. Please try again.' },
-      { status: 503 }
+      { detail: "Unable to reach the server. Please try again." },
+      { status: 503 },
     );
   }
 }

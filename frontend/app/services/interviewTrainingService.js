@@ -74,7 +74,7 @@ class InterviewTrainingService {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -103,7 +103,7 @@ class InterviewTrainingService {
       toast.error(
         `Failed to generate question: ${
           error.response?.data?.detail || error.message
-        }`
+        }`,
       );
       throw error;
     }
@@ -279,7 +279,7 @@ class InterviewTrainingService {
     questionId,
     answerText = "",
     audioBlob = null,
-    videoBlob = null
+    videoBlob = null,
   ) {
     try {
       if (!this.currentSession) {
@@ -287,7 +287,7 @@ class InterviewTrainingService {
       }
 
       const question = this.currentSession.questions.find(
-        (q) => q.id === questionId
+        (q) => q.id === questionId,
       );
       if (!question) {
         throw new Error("Question not found");
@@ -310,7 +310,7 @@ class InterviewTrainingService {
       if (answerText.trim()) {
         const evaluation = await this.evaluateTextAnswer(
           question.text,
-          answerText
+          answerText,
         );
         answer.evaluation = evaluation;
         this.currentSession.evaluations.push(evaluation);
@@ -454,7 +454,7 @@ class InterviewTrainingService {
       evaluations.length > 0
         ? evaluations.reduce(
             (sum, evaluation) => sum + (evaluation.score || 0),
-            0
+            0,
           ) / evaluations.length
         : 0;
 
@@ -564,7 +564,7 @@ class InterviewTrainingService {
     if (this.currentSession) {
       localStorage.setItem(
         "dropshapes_current_interview_session",
-        JSON.stringify(this.currentSession)
+        JSON.stringify(this.currentSession),
       );
     }
   }
@@ -575,7 +575,7 @@ class InterviewTrainingService {
   loadCurrentSession() {
     try {
       const stored = localStorage.getItem(
-        "dropshapes_current_interview_session"
+        "dropshapes_current_interview_session",
       );
       if (stored) {
         this.currentSession = JSON.parse(stored);
@@ -604,7 +604,7 @@ class InterviewTrainingService {
 
       localStorage.setItem(
         "dropshapes_interview_history",
-        JSON.stringify(history)
+        JSON.stringify(history),
       );
     } catch (error) {
       console.error("Failed to save session to history:", error);
@@ -644,7 +644,7 @@ class InterviewTrainingService {
           version: "1.0",
         },
         null,
-        2
+        2,
       );
     } catch (error) {
       console.error("Failed to export session:", error);

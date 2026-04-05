@@ -58,6 +58,7 @@ def _title_from_message(text: str, max_len: int = 80) -> str:
 
 
 @router.get("/conversations", response_model=List[ConversationResponse])
+@router.get("/conversations/", response_model=List[ConversationResponse])
 def list_conversations(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
@@ -73,6 +74,7 @@ def list_conversations(
 
 
 @router.get("/conversations/{conversation_id}", response_model=ConversationWithMessages)
+@router.get("/conversations/{conversation_id}/", response_model=ConversationWithMessages)
 def get_conversation(
     conversation_id: int,
     db: Session = Depends(get_db),
@@ -93,6 +95,7 @@ def get_conversation(
 
 
 @router.post("/conversations", response_model=ConversationResponse)
+@router.post("/conversations/", response_model=ConversationResponse)
 def create_conversation(
     body: Optional[ConversationCreate] = None,
     db: Session = Depends(get_db),
@@ -108,6 +111,7 @@ def create_conversation(
 
 
 @router.patch("/conversations/{conversation_id}", response_model=ConversationResponse)
+@router.patch("/conversations/{conversation_id}/", response_model=ConversationResponse)
 def update_conversation(
     conversation_id: int,
     body: ConversationUpdate,
@@ -132,6 +136,7 @@ def update_conversation(
 
 
 @router.delete("/conversations/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/conversations/{conversation_id}/", status_code=status.HTTP_204_NO_CONTENT)
 def delete_conversation(
     conversation_id: int,
     db: Session = Depends(get_db),
@@ -154,6 +159,7 @@ def delete_conversation(
 
 
 @router.post("/message", response_model=ChatSendResponse)
+@router.post("/message/", response_model=ChatSendResponse)
 def send_message(
     body: ChatMessageCreate,
     db: Session = Depends(get_db),
@@ -265,6 +271,7 @@ def _get_message_and_verify_access(
 
 
 @router.get("/messages/{message_id}/audio")
+@router.get("/messages/{message_id}/audio/")
 def get_message_audio(
     request: Request,
     message_id: int,
@@ -302,6 +309,7 @@ def get_message_audio(
 
 
 @router.get("/messages/{message_id}/audio-url")
+@router.get("/messages/{message_id}/audio-url/")
 def get_message_audio_url(
     request: Request,
     message_id: int,
@@ -328,6 +336,7 @@ CHAT_RESPONSE_VOICE_MALE = "Matthew"
 
 
 @router.post("/audio", response_model=ChatSendResponse)
+@router.post("/audio/", response_model=ChatSendResponse)
 async def send_audio(
     audio: UploadFile = File(...),
     conversation_id: Optional[int] = Query(None),

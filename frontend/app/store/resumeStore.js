@@ -45,7 +45,7 @@ const useResumeStore = create((set) => ({
     try {
       const response = await axiosInstance.put(
         `${endpoints.resumes}/${resumeData.id}`,
-        resumeData
+        resumeData,
       );
       const data = response.data;
       set({ loading: false });
@@ -65,7 +65,7 @@ const useResumeStore = create((set) => ({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (!response.ok) throw new Error("Failed to fetch resumes");
@@ -88,7 +88,7 @@ const useResumeStore = create((set) => ({
     try {
       console.log("resumeID ", resumeId);
       const response = await axiosInstance.get(
-        `${endpoints.resumes}/${resumeId}`
+        `${endpoints.resumes}/${resumeId}`,
       );
       const data = response.data;
       set({ loading: false });
@@ -116,7 +116,7 @@ const useResumeStore = create((set) => ({
             "Content-Type": "application/json",
             Authorization: `Bearer ${authToken}`,
           },
-        }
+        },
       );
 
       if (!res.ok)
@@ -151,7 +151,7 @@ const useResumeStore = create((set) => ({
             "Content-Type": "application/json",
             Authorization: `Bearer ${authToken}`,
           },
-        }
+        },
       );
 
       if (!res.ok) {
@@ -176,7 +176,7 @@ const useResumeStore = create((set) => ({
                 item &&
                 typeof item === "object" &&
                 "original" in item &&
-                "improved" in item
+                "improved" in item,
             );
             if (validSuggestions[section].length === 0) {
               delete validSuggestions[section];
@@ -213,7 +213,7 @@ const useResumeStore = create((set) => ({
     resumeDataFromClient,
     router,
     toast,
-    setIsSubmitting
+    setIsSubmitting,
   ) => {
     const resume = $resume.getValue();
     const resumeID = `${resumeDataFromClient?.id || ""}`.trim();
@@ -279,7 +279,7 @@ const useResumeStore = create((set) => ({
         const response = await axiosInstance.put(
           `/api/resumes/${resumeID}`,
           formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
+          { headers: { "Content-Type": "multipart/form-data" } },
         );
         if (!response?.data?.id) {
           throw new Error("Failed to update resume");
@@ -291,7 +291,7 @@ const useResumeStore = create((set) => ({
     } catch (error) {
       console.error("Error submitting resume:", error);
       toast.error(
-        "Could not save resume before submitting. Showing preview from local data."
+        "Could not save resume before submitting. Showing preview from local data.",
       );
     } finally {
       setIsSubmitting(false);

@@ -1,30 +1,30 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Icon } from '@iconify/react';
-import { $coverLetter } from '@/app/utils/coverLetterObservable';
-import apiService from '@/app/apimodule/utils/apiService';
-import endpoints from '@/app/apimodule/endpoints/ApiEndpoints';
-import { Loader } from 'lucide-react';
-import type { CoverLetterData } from '@/app/utils/coverLetterService';
+import { useEffect, useState } from "react";
+import { Icon } from "@iconify/react";
+import { $coverLetter } from "@/app/utils/coverLetterObservable";
+import apiService from "@/app/apimodule/utils/apiService";
+import endpoints from "@/app/apimodule/endpoints/ApiEndpoints";
+import { Loader } from "lucide-react";
+import type { CoverLetterData } from "@/app/utils/coverLetterService";
 import {
   defaultCoverLetterData,
   defaultIntroduction,
   defaultClosing,
-} from '@/app/utils/coverLetterService';
+} from "@/app/utils/coverLetterService";
 
 interface TextGenerateModalProps {
   show?: boolean;
   onHide: () => void;
-  sectionName?: 'introduction' | 'body' | 'closing';
+  sectionName?: "introduction" | "body" | "closing";
   title?: string;
 }
 
 export default function TextGenerateModal({
   show = false,
   onHide,
-  sectionName = 'introduction',
-  title = 'Improve with AI',
+  sectionName = "introduction",
+  title = "Improve with AI",
 }: TextGenerateModalProps) {
   const [isImproving, setIsImproving] = useState(false);
   const [creditLoading, setCreditsLoading] = useState(false);
@@ -45,7 +45,7 @@ export default function TextGenerateModal({
         const response = await apiService.get(endpoints.subscriptionUsage);
         setUsage(response?.data ?? null);
       } catch (err) {
-        console.error('Failed to load subscription info', err);
+        console.error("Failed to load subscription info", err);
       } finally {
         setCreditsLoading(false);
       }
@@ -63,23 +63,23 @@ export default function TextGenerateModal({
     try {
       setIsImproving(true);
       const token =
-        typeof window !== 'undefined' ? localStorage.getItem('access') : null;
+        typeof window !== "undefined" ? localStorage.getItem("access") : null;
       const selectedProfession =
-        typeof window !== 'undefined'
-          ? localStorage.getItem('coverLetter_selectedProfession')
+        typeof window !== "undefined"
+          ? localStorage.getItem("coverLetter_selectedProfession")
           : null;
       const jobDescription =
-        typeof window !== 'undefined'
-          ? localStorage.getItem('coverLetter_jobDescription')
+        typeof window !== "undefined"
+          ? localStorage.getItem("coverLetter_jobDescription")
           : null;
       const baseUrl =
-        typeof process.env.NEXT_PUBLIC_API_URL === 'string'
-          ? process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '')
-          : '';
+        typeof process.env.NEXT_PUBLIC_API_URL === "string"
+          ? process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "")
+          : "";
       const res = await fetch(`${baseUrl}cover-letters/ai-enhance`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
@@ -91,7 +91,7 @@ export default function TextGenerateModal({
       const data = await res.json();
       setAiResult(data);
     } catch (error) {
-      console.error('Error improving with AI:', error);
+      console.error("Error improving with AI:", error);
     } finally {
       setIsImproving(false);
     }
@@ -112,13 +112,13 @@ export default function TextGenerateModal({
       closing: { ...defaultClosing, ...current.closing },
     };
 
-    if (sectionName === 'body') {
-      updated.body = (aiResult.body ?? '').replace(/\\n/g, '\n');
-    } else if (sectionName === 'closing') {
-      updated.closing = { ...updated.closing, text: aiResult.closing ?? '' };
-    } else if (sectionName === 'introduction') {
-      let introText = aiResult.introduction ?? '';
-      const prefix = 'Dear Hiring Manager,\n\n';
+    if (sectionName === "body") {
+      updated.body = (aiResult.body ?? "").replace(/\\n/g, "\n");
+    } else if (sectionName === "closing") {
+      updated.closing = { ...updated.closing, text: aiResult.closing ?? "" };
+    } else if (sectionName === "introduction") {
+      let introText = aiResult.introduction ?? "";
+      const prefix = "Dear Hiring Manager,\n\n";
       if (introText.startsWith(prefix)) {
         introText = introText.slice(prefix.length);
       }
@@ -164,7 +164,7 @@ export default function TextGenerateModal({
         <div className="p-6 overflow-y-auto max-h-[60vh] space-y-6">
           {!aiResult ? (
             <p className="text-gray-700 dark:text-gray-300 text-center text-lg leading-relaxed">
-              ⚡ Click below to let{' '}
+              ⚡ Click below to let{" "}
               <span className="font-semibold text-blue-500">AI</span> improve
               your <strong>{sectionName}</strong> section.
             </p>
@@ -177,22 +177,22 @@ export default function TextGenerateModal({
                           shadow-md"
               >
                 <h4 className="text-lg font-semibold text-green-700 dark:text-green-300 mb-3">
-                  Improved{' '}
+                  Improved{" "}
                   {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
                 </h4>
                 <p className="text-sm text-green-700 dark:text-green-300 whitespace-pre-wrap leading-relaxed">
-                  {sectionName === 'introduction' &&
+                  {sectionName === "introduction" &&
                     (() => {
-                      const prefix = 'Dear Hiring Manager,\n\n';
-                      let text = aiResult.introduction ?? '';
+                      const prefix = "Dear Hiring Manager,\n\n";
+                      let text = aiResult.introduction ?? "";
                       if (text.startsWith(prefix)) {
                         text = text.slice(prefix.length);
                       }
                       return text;
                     })()}
-                  {sectionName === 'body' &&
-                    (aiResult.body ?? '').replace(/\\n/g, '\n')}
-                  {sectionName === 'closing' && (aiResult.closing ?? '')}
+                  {sectionName === "body" &&
+                    (aiResult.body ?? "").replace(/\\n/g, "\n")}
+                  {sectionName === "closing" && (aiResult.closing ?? "")}
                 </p>
               </div>
             </div>
@@ -208,14 +208,14 @@ export default function TextGenerateModal({
             usage && (
               <div className="mb-4 text-sm text-gray-300">
                 <p>
-                  <strong>Credits Remaining:</strong>{' '}
-                  {usage.ai_credits_remaining ?? 'N/A'}
+                  <strong>Credits Remaining:</strong>{" "}
+                  {usage.ai_credits_remaining ?? "N/A"}
                 </p>
                 <p className="text-xs text-gray-400 mb-3">
                   Each AI improvement consumes <strong>1 credit</strong>
                 </p>
                 <p className="text-xs text-gray-500">
-                  Plan: {usage.subscription_plan ?? 'Free'}
+                  Plan: {usage.subscription_plan ?? "Free"}
                 </p>
               </div>
             )
